@@ -137,6 +137,7 @@ public class InfernoStatsPlugin extends Plugin
 	protected void shutDown()
 	{
 		removeCounters();
+		clientToolbar.removeNavigation(navButton);
 	}
 
 	@Subscribe
