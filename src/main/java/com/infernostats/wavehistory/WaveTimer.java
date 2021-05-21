@@ -2,7 +2,6 @@ package com.infernostats.wavehistory;
 
 import com.infernostats.InfernoStatsPlugin;
 import net.runelite.client.ui.overlay.infobox.InfoBox;
-import net.runelite.client.ui.overlay.infobox.Timer;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.awt.*;
@@ -44,32 +43,31 @@ public class WaveTimer extends InfoBox {
     @Override
     public String getTooltip()
     {
-        Duration time = Duration.between(startTime, lastTime == null ? Instant.now() : lastTime);
-        return "Elapsed time: " +  GetTime();
+        return "Elapsed time: " + GetTime();
     }
 
     public String GetTime()
     {
-        long time;
-        final String format;
+        long seconds;
 
         if (startTime == null)
         {
             return null;
         }
 
-        time = Duration.between(startTime, lastTime == null ? Instant.now() : lastTime).toMillis();
+        seconds = Duration.between(startTime, lastTime == null ? Instant.now() : lastTime).getSeconds();
 
-        if (time < (60 * 60 * 1000))
+        return seconds / 60 + ":" + String.format("%02d", seconds % 60);
+    }
+
+    public Duration SplitTime()
+    {
+        if (startTime == null)
         {
-            format = "mm:ss";
-        }
-        else
-        {
-            format = "HH:mm:ss";
+            return null;
         }
 
-        return DurationFormatUtils.formatDuration(time, format, true);
+        return Duration.between(startTime, lastTime == null ? Instant.now() : lastTime);
     }
 
     public void Pause()

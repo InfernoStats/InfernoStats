@@ -37,7 +37,8 @@ public class Wave {
     public boolean failed = false;
     public Instant startTime;
     public Instant stopTime;
-    public String splitTime;
+    public Duration splitTime;
+    public Duration predictedTime;
     public boolean forceReset;
 
     private static final List<Integer> SPLIT_WAVES = new ArrayList<Integer>() {{
@@ -56,7 +57,7 @@ public class Wave {
         add(69);
     }};
 
-    public Wave(int id, String splitTime)
+    public Wave(int id, Duration splitTime)
     {
         this.id = id;
         this.NPCSpawns = new ArrayList<>();
@@ -96,6 +97,16 @@ public class Wave {
         return SPLIT_WAVES.contains(id);
     }
 
+    public String SplitTimeString()
+    {
+        return formatTime(splitTime.toMillis());
+    }
+
+    public String PredictedTimeString()
+    {
+        return formatTime(predictedTime.toMillis());
+    }
+
     public long WaveTime()
     {
         if (stopTime == null)
@@ -108,38 +119,32 @@ public class Wave {
         }
     }
 
-    public String WaveStartString()
-    {
-        long time = WaveTime();
-
-        final String format;
-        if (time < (60 * 60 * 1000))
-        {
-            format = "mm:ss";
-        }
-        else
-        {
-            format = "HH:mm:ss";
-        }
-
-        return DurationFormatUtils.formatDuration(time, format, true);
-    }
-
     public String WaveTimeString()
     {
-        long time = WaveTime();
+        return formatTime(WaveTime());
+    }
 
-        final String format;
-        if (time < (60 * 60 * 1000))
+    public long CurrentTime()
+    {
+        if (stopTime == null)
         {
-            format = "mm:ss";
+            return Duration.between(startTime, Instant.now()).plus(splitTime).toMillis();
         }
         else
         {
-            format = "HH:mm:ss";
+            return Duration.between(startTime, stopTime).plus(splitTime).toMillis();
         }
+    }
 
-        return DurationFormatUtils.formatDuration(time, format, true);
+    public String CurrentTimeString()
+    {
+        return formatTime(CurrentTime());
+    }
+
+    private String formatTime(long msTime)
+    {
+        long seconds = Duration.ofMillis(msTime).getSeconds();
+        return seconds / 60 + ":" + String.format("%02d", seconds % 60);
     }
 
     public Map<String, ArrayList<ArrayList<Integer>>> RebasedNPCs()
@@ -190,8 +195,6 @@ public class Wave {
             sb.append("&");
         }
         sb.deleteCharAt(sb.length()-1); // Remove trailing ampersand
-
-        log.debug("Serialized wave: {}", sb.toString());
 
         return sb.toString().replaceAll("\\s", "");
     }

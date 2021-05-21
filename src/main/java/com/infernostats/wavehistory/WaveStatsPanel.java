@@ -66,7 +66,7 @@ public class WaveStatsPanel extends JPanel {
         waveNumber = new JLabel();
         if (wave.IsSplit())
         {
-            waveNumber.setText("Wave " + wave.id + " - " + wave.splitTime);
+            waveNumber.setText("Wave " + wave.id + " - " + wave.CurrentTimeString());
         }
         else
         {
@@ -89,7 +89,7 @@ public class WaveStatsPanel extends JPanel {
         durationLine.setBackground(null);
 
         duration = new JLabel();
-        duration.setText("Time: " + wave.WaveStartString());
+        duration.setText("Time: " + wave.WaveTimeString());
         duration.setForeground(Color.WHITE);
         durationLine.add(duration, BorderLayout.WEST);
 

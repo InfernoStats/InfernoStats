@@ -4,9 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provides;
 import com.infernostats.specialweapon.SpecialWeapon;
 import com.infernostats.specialweapon.SpecialWeaponStats;
-import com.infernostats.wavehistory.WaveHistoryPanel;
-import com.infernostats.wavehistory.WaveHistory;
-import com.infernostats.wavehistory.WaveTimer;
+import com.infernostats.wavehistory.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +55,8 @@ public class InfernoStatsPlugin extends Plugin
 	private int lastSpecTick;
 	private WaveTimer waveTimer;
 	private WaveHistory waveHistory;
+	private WaveHistoryWriter waveHistoryWriter;
+	private WaveSplits waveSplits;
 	private SpecialWeapon specialWeapon;
 
 	private static final String CONFIG_GROUP = "infernostats";
@@ -117,6 +117,8 @@ public class InfernoStatsPlugin extends Plugin
 		specialPercentage = -1;
 		prevMorUlRek = false;
 		waveHistory = new WaveHistory();
+		waveHistoryWriter = new WaveHistoryWriter();
+		waveSplits = new WaveSplits(config);
 
 		panel = injector.getInstance(WaveHistoryPanel.class);
 		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/blob-square.png");
@@ -153,7 +155,7 @@ public class InfernoStatsPlugin extends Plugin
 			}
 
 			// User force-logged or hopped before finishing the wave
-			if (waveHistory.CurrentWave().stopTime == null)
+			if (!waveHistory.waves.isEmpty() && waveHistory.CurrentWave().stopTime == null)
 			{
 				waveHistory.CurrentWave().Pause();
 			}
@@ -410,6 +412,22 @@ public class InfernoStatsPlugin extends Plugin
 			removeWaveTimer();
 			waveHistory.CurrentWave().Finished(true);
 			panel.updateWave(waveHistory.CurrentWave());
+			if (config.saveWaveTimes())
+			{
+				waveHistoryWriter.toFile(
+						client.getLocalPlayer().getName(),
+						waveHistory.CSVName(false),
+						waveHistory.ToCSV(false)
+				);
+			}
+			if (config.saveSplitTimes())
+			{
+				waveHistoryWriter.toFile(
+						client.getLocalPlayer().getName(),
+						waveHistory.CSVName(true),
+						waveHistory.ToCSV(true)
+				);
+			}
 			return;
 		}
 
@@ -418,6 +436,22 @@ public class InfernoStatsPlugin extends Plugin
 			removeWaveTimer();
 			waveHistory.CurrentWave().Finished(false);
 			panel.updateWave(waveHistory.CurrentWave());
+			if (config.saveWaveTimes())
+			{
+				waveHistoryWriter.toFile(
+						client.getLocalPlayer().getName(),
+						waveHistory.CSVName(false),
+						waveHistory.ToCSV(false)
+				);
+			}
+			if (config.saveSplitTimes())
+			{
+				waveHistoryWriter.toFile(
+						client.getLocalPlayer().getName(),
+						waveHistory.CSVName(true),
+						waveHistory.ToCSV(true)
+				);
+			}
 			return;
 		}
 
@@ -450,10 +484,10 @@ public class InfernoStatsPlugin extends Plugin
 		Matcher matcher = WaveTimer.WAVE_MESSAGE.matcher(message);
 		if (matcher.find())
 		{
-			int wave = Integer.parseInt(matcher.group(1));
+			int waveId = Integer.parseInt(matcher.group(1));
 
 			// TODO: Does the in-game timer reset to 6 seconds if you force log on wave 1?
-			if (wave == 1 || waveTimer == null)
+			if (waveId == 1 || waveTimer == null)
 			{
 				createWaveTimer();
 			}
@@ -468,20 +502,44 @@ public class InfernoStatsPlugin extends Plugin
 				}
 			}
 
-			waveHistory.NewWave(wave, waveTimer.GetTime());
-			panel.addWave(waveHistory.CurrentWave());
+			waveHistory.NewWave(waveId, waveTimer.SplitTime());
 
-			if (config.splitTimes() && waveHistory.CurrentWave().IsSplit())
+			Wave wave = waveHistory.CurrentWave();
+			panel.addWave(wave);
+
+			if (config.splitTimes() && wave.IsSplit())
 			{
-				final String splitMessage = new ChatMessageBuilder()
+				final ChatMessageBuilder chatMessageBuilder = new ChatMessageBuilder()
 						.append(ChatColorType.HIGHLIGHT)
-						.append("Wave Split: " + waveTimer.GetTime())
-						.build();
+						.append("Wave Split: " + waveTimer.GetTime());
+
+				if (config.showTargetSplitTimes())
+				{
+					chatMessageBuilder.append(waveSplits.GoalDifference(wave));
+				}
+
+				final String splitMessage = chatMessageBuilder.build();
 
 				chatMessageManager.queue(
 						QueuedMessage.builder()
 								.type(ChatMessageType.CONSOLE)
 								.runeLiteFormattedMessage(splitMessage)
+								.build());
+			}
+
+			if (config.predictedCompletionTime() && wave.IsSplit())
+			{
+				wave.predictedTime = waveSplits.PredictedTime(wave);
+
+				final String predictedMessage = new ChatMessageBuilder()
+						.append(ChatColorType.HIGHLIGHT)
+						.append("Predicted Time: " + wave.PredictedTimeString())
+						.build();
+
+				chatMessageManager.queue(
+						QueuedMessage.builder()
+								.type(ChatMessageType.CONSOLE)
+								.runeLiteFormattedMessage(predictedMessage)
 								.build());
 			}
 		}
@@ -542,6 +600,8 @@ public class InfernoStatsPlugin extends Plugin
 				}
 			}
 		}
+
+		waveSplits.UpdateTargetSplits();
 	}
 
 	private SpecialWeapon usedSpecialWeapon()

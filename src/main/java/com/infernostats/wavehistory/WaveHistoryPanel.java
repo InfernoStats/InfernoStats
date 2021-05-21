@@ -18,17 +18,21 @@ import java.util.ArrayList;
 @Singleton
 public class WaveHistoryPanel extends PluginPanel {
     private final JPanel waveHistoryContainer = new JPanel();
-    private final TotalStatsPanel totalStatsPanel = new TotalStatsPanel();
+    private final TotalStatsPanel totalStatsPanel;
+    private final WaveSplitsPanel waveSplitsPanel;
     private ArrayList<WaveStatsPanel> waveStatsPanels = new ArrayList<>();
 
     private final InfernoStatsPlugin plugin;
     private final InfernoStatsConfig config;
 
     @Inject
-    public WaveHistoryPanel(InfernoStatsPlugin plugin, InfernoStatsConfig config)
+    public WaveHistoryPanel(InfernoStatsPlugin plugin, InfernoStatsConfig config, WaveHistory waveHistory)
     {
         this.plugin = plugin;
         this.config = config;
+
+        totalStatsPanel = new TotalStatsPanel();
+        waveSplitsPanel = new WaveSplitsPanel(waveHistory);
 
         setLayout(new BorderLayout(0, 4));
         setBackground(ColorScheme.DARK_GRAY_COLOR);
@@ -42,9 +46,10 @@ public class WaveHistoryPanel extends PluginPanel {
         scrollableContainer.setBackground(ColorScheme.DARK_GRAY_COLOR);
         scrollableContainer.getVerticalScrollBar().setPreferredSize(new Dimension(6, 0));
         add(totalStatsPanel, BorderLayout.NORTH, 0);
+        add(waveSplitsPanel, BorderLayout.CENTER, 0);
 
         mainContent.add(waveHistoryContainer, BorderLayout.NORTH);
-        add(scrollableContainer, BorderLayout.CENTER);
+        add(scrollableContainer, BorderLayout.SOUTH);
     }
 
     public void addWave(Wave wave)
