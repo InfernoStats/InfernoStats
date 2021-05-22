@@ -24,6 +24,7 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
+import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
 import net.runelite.client.util.ImageUtil;
 import org.apache.commons.lang3.ArrayUtils;
@@ -63,6 +64,7 @@ public class InfernoStatsPlugin extends Plugin
 	private static final String HIDE_KEY = "hide";
 	private static final String TIMER_KEY = "showWaveTimer";
 	private static final String SPECIAL_KEY = "showSpecialCounter";
+	private static final String OVERLAY_KEY = "showStatsOverlay";
 
 	// Prayer points on every tick
 	private int currPrayer;
@@ -99,6 +101,12 @@ public class InfernoStatsPlugin extends Plugin
 	@Inject
 	private ItemManager itemManager;
 
+	@Inject
+	private OverlayManager overlayManager;
+
+	@Inject
+	private InfernoStatsOverlay statsOverlay;
+
 	@Getter(AccessLevel.PACKAGE)
 	private WaveHistoryPanel panel;
 
@@ -133,12 +141,18 @@ public class InfernoStatsPlugin extends Plugin
 		{
 			clientToolbar.addNavigation(navButton);
 		}
+
+		if (config.statsOverlay())
+		{
+			overlayManager.add(statsOverlay);
+		}
 	}
 
 	@Override
 	protected void shutDown()
 	{
 		removeCounters();
+		overlayManager.remove(statsOverlay);
 		clientToolbar.removeNavigation(navButton);
 	}
 
@@ -154,10 +168,11 @@ public class InfernoStatsPlugin extends Plugin
 				waveTimer.Pause();
 			}
 
+			Wave wave = GetCurrentWave();
 			// User force-logged or hopped before finishing the wave
-			if (!waveHistory.waves.isEmpty() && waveHistory.CurrentWave().stopTime == null)
+			if (wave != null && wave.stopTime == null)
 			{
-				waveHistory.CurrentWave().Pause();
+				wave.Pause();
 			}
 		}
 
@@ -241,7 +256,7 @@ public class InfernoStatsPlugin extends Plugin
 
 		if (waveHistory.waves.size() != 0)
 		{
-			panel.updateWave(waveHistory.CurrentWave());
+			panel.updateWave(GetCurrentWave());
 		}
 
 		currPrayer = client.getBoostedSkillLevel(PRAYER);
@@ -282,8 +297,8 @@ public class InfernoStatsPlugin extends Plugin
 			return;
 		}
 
-		// We haven't started Wave 1 yet
-		if (waveHistory.waves.size() == 0)
+		Wave wave = GetCurrentWave();
+		if (wave == null)
 		{
 			return;
 		}
@@ -293,7 +308,7 @@ public class InfernoStatsPlugin extends Plugin
 			final int prayer = event.getBoostedLevel();
 			if (prayer == currPrayer - 1)
 			{
-				waveHistory.CurrentWave().prayerDrain += 1;
+				wave.prayerDrain += 1;
 			}
 		}
 	}
@@ -314,12 +329,13 @@ public class InfernoStatsPlugin extends Plugin
 			return;
 		}
 
+		Wave wave = GetCurrentWave();
 		if (target == client.getLocalPlayer())
 		{
 			// NPC did damage to the player
 			if (hitsplat.getHitsplatType() == Hitsplat.HitsplatType.DAMAGE_ME)
 			{
-				waveHistory.CurrentWave().damageTaken += hitsplat.getAmount();
+				wave.damageTaken += hitsplat.getAmount();
 			}
 			return;
 		}
@@ -328,7 +344,7 @@ public class InfernoStatsPlugin extends Plugin
 			// Player did damage to an NPC
 			if (hitsplat.getHitsplatType() == Hitsplat.HitsplatType.DAMAGE_ME)
 			{
-				waveHistory.CurrentWave().damageDealt += hitsplat.getAmount();
+				wave.damageDealt += hitsplat.getAmount();
 			}
 		}
 
@@ -385,7 +401,7 @@ public class InfernoStatsPlugin extends Plugin
 		}
 
 		// We only want the original wave spawn, not minions or mager respawns
-		if (waveHistory.CurrentWave().WaveTime() > 1 * 1000)
+		if (GetCurrentWave().WaveTime() > 1 * 1000)
 		{
 			return;
 		}
@@ -407,11 +423,12 @@ public class InfernoStatsPlugin extends Plugin
 			return;
 		}
 
+		Wave wave = GetCurrentWave();
 		if (WaveTimer.DEFEATED_MESSAGE.matcher(message).matches())
 		{
 			removeWaveTimer();
-			waveHistory.CurrentWave().Finished(true);
-			panel.updateWave(waveHistory.CurrentWave());
+			wave.Finished(true);
+			panel.updateWave(wave);
 			if (config.saveWaveTimes())
 			{
 				waveHistoryWriter.toFile(
@@ -434,8 +451,8 @@ public class InfernoStatsPlugin extends Plugin
 		if (WaveTimer.COMPLETE_MESSAGE.matcher(message).matches())
 		{
 			removeWaveTimer();
-			waveHistory.CurrentWave().Finished(false);
-			panel.updateWave(waveHistory.CurrentWave());
+			wave.Finished(false);
+			panel.updateWave(wave);
 			if (config.saveWaveTimes())
 			{
 				waveHistoryWriter.toFile(
@@ -458,19 +475,19 @@ public class InfernoStatsPlugin extends Plugin
 		if (WaveTimer.PAUSED_MESSAGE.matcher(message).find())
 		{
 			waveTimer.Pause();
-			waveHistory.CurrentWave().Finished(false);
+			wave.Finished(false);
 			return;
 		}
 
 		if (WaveTimer.WAVE_COMPLETE_MESSAGE.matcher(message).find())
 		{
-			waveHistory.CurrentWave().Finished(false);
+			wave.Finished(false);
 
 			if (config.waveTimes())
 			{
 				final String waveMessage = new ChatMessageBuilder()
 						.append(ChatColorType.HIGHLIGHT)
-						.append("Wave Completed in: " + waveHistory.CurrentWave().WaveTimeString())
+						.append("Wave Completed in: " + wave.WaveTimeString())
 						.build();
 
 				chatMessageManager.queue(
@@ -495,16 +512,16 @@ public class InfernoStatsPlugin extends Plugin
 			{
 				waveTimer.Resume();
 
-				if (waveHistory.CurrentWave().forceReset)
+				if (wave.forceReset)
 				{
-					waveHistory.CurrentWave().ReinitWave();
+					wave.ReinitWave();
 					return;
 				}
 			}
 
 			waveHistory.NewWave(waveId, waveTimer.SplitTime());
 
-			Wave wave = waveHistory.CurrentWave();
+			wave = GetCurrentWave();
 			panel.addWave(wave);
 
 			if (config.splitTimes() && wave.IsSplit())
@@ -601,7 +618,28 @@ public class InfernoStatsPlugin extends Plugin
 			}
 		}
 
+		if (event.getKey().equals(OVERLAY_KEY))
+		{
+			if (config.statsOverlay())
+			{
+				overlayManager.add(statsOverlay);
+			}
+			else
+			{
+				overlayManager.remove(statsOverlay);
+			}
+		}
+
 		waveSplits.UpdateTargetSplits();
+	}
+
+	public Wave GetCurrentWave()
+	{
+		if (waveHistory.waves.isEmpty())
+		{
+			return null;
+		}
+		return waveHistory.CurrentWave();
 	}
 
 	private SpecialWeapon usedSpecialWeapon()
@@ -682,12 +720,12 @@ public class InfernoStatsPlugin extends Plugin
 		}
 	}
 
-	private boolean isInInferno()
+	public boolean isInInferno()
 	{
 		return client.getMapRegions() != null && ArrayUtils.contains(client.getMapRegions(), INFERNO_REGION_ID);
 	}
 
-	private boolean isInMorUlRek()
+	public boolean isInMorUlRek()
 	{
 		if (client.getMapRegions() == null)
 		{
@@ -708,7 +746,7 @@ public class InfernoStatsPlugin extends Plugin
 		return true;
 	}
 
-	private boolean isInVoid()
+	public boolean isInVoid()
 	{
 		if (client.getMapRegions() == null)
 		{

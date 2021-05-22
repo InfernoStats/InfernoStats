@@ -11,9 +11,22 @@ public interface InfernoStatsConfig extends Config
 	@ConfigSection(
 			name = "Wave and Split Times",
 			description = "Wave and Split Times Section",
-			position = 0
+			position = 0,
+			closedByDefault = true
 	)
 	String waveAndSplitTimes = "waveAndSplitTimes";
+
+	@ConfigItem(
+			position = 0,
+			keyName = "showStatsOverlay",
+			name = "Stats Overlay",
+			description = "Displays an overlay with the wave number and splits/predicted time.",
+			section = waveAndSplitTimes
+	)
+	default boolean statsOverlay()
+	{
+		return false;
+	}
 
 	@ConfigItem(
 			position = 1,
@@ -90,12 +103,25 @@ public interface InfernoStatsConfig extends Config
 	@ConfigSection(
 			name = "Special Attack",
 			description = "Split times that you wish to achieve",
-			position = 2
+			position = 1,
+			closedByDefault = true
 	)
 	String specialAttack = "specialAttack";
 
 	@ConfigItem(
 			position = 0,
+			keyName = "showSpecialCounter",
+			name = "Special Counter",
+			description = "Displays an infobox of the restoration of special attacks",
+			section = specialAttack
+	)
+	default boolean specialCounter()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			position = 1,
 			keyName = "effectiveRestoration",
 			name = "Effective Restoration",
 			description = "Calculates same-tick health and prayer loss into special attack",
@@ -106,22 +132,11 @@ public interface InfernoStatsConfig extends Config
 		return true;
 	}
 
-	@ConfigItem(
-			position = 1,
-			keyName = "showSpecialCounter",
-			name = "Special Counter",
-			description = "Displays an infobox of the restoration of special attacks",
-			section = specialAttack
-	)
-	default boolean specialCounter()
-	{
-		return true;
-	}
-
 	@ConfigSection(
 		name = "Target Split Times",
 		description = "Split times that you wish to achieve",
-		position = 3
+		position = 2,
+		closedByDefault = true
 	)
 	String targetSplitTimes = "targetSplitTimes";
 
@@ -134,7 +149,7 @@ public interface InfernoStatsConfig extends Config
 	)
 	default boolean showTargetSplitTimes()
 	{
-		return true;
+		return false;
 	}
 
 	@ConfigItem(

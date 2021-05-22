@@ -63,6 +63,7 @@ public class Wave {
         this.NPCSpawns = new ArrayList<>();
         this.startTime = Instant.now();
         this.splitTime = splitTime;
+        this.predictedTime = null;
     }
 
     public void AddSpawn(WorldPoint tile, NPC npc)
