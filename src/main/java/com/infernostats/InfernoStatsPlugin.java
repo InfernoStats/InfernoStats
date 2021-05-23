@@ -674,8 +674,12 @@ public class InfernoStatsPlugin extends Plugin
 		if (counter == null)
 		{
 			counter = new SpecialWeaponStats(client, itemManager.getImage(specialWeapon.getItemID()), this, specialWeapon);
-			infoBoxManager.addInfoBox(counter);
 			specialCounter[specialWeapon.ordinal()] = counter;
+
+			if (config.specialCounter())
+			{
+				infoBoxManager.addInfoBox(counter);
+			}
 		}
 
 		counter.addHits(hit, prevSpecHealth, currSpecHealth,
