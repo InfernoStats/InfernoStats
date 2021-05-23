@@ -273,7 +273,7 @@ public interface InfernoStatsConfig extends Config
 	}
 
 	@ConfigItem(
-			position = 21,
+			position = 11,
 			keyName = "targetWave67Split",
 			name = "Wave 67",
 			description = "Split Target",
