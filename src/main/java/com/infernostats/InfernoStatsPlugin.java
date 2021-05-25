@@ -254,9 +254,10 @@ public class InfernoStatsPlugin extends Plugin
 			return;
 		}
 
-		if (waveHistory.waves.size() != 0)
+		Wave wave = GetCurrentWave();
+		if (wave != null)
 		{
-			panel.updateWave(GetCurrentWave());
+			panel.updateWave(wave);
 		}
 
 		currPrayer = client.getBoostedSkillLevel(PRAYER);
@@ -382,6 +383,7 @@ public class InfernoStatsPlugin extends Plugin
 		final NPC npc = event.getNpc();
 		final Actor npcActor = event.getActor();
 		final WorldPoint spawnTile = npcActor.getWorldLocation();
+		final int npcId = npc.getId();
 
 		if (!isInInferno())
 		{
@@ -389,13 +391,13 @@ public class InfernoStatsPlugin extends Plugin
 		}
 
 		// ROCKY_SUPPORT is the normal pillar id; ROCKY_SUPPORT_7710 spawns as a pillar falls
-		if (npc.getId() == NpcID.ROCKY_SUPPORT || npc.getId() == NpcID.ROCKY_SUPPORT_7710)
+		if (npcId == NpcID.ROCKY_SUPPORT || npcId == NpcID.ROCKY_SUPPORT_7710)
 		{
 			return;
 		}
 
-		// We'll ignore nibblers and zuk spawns off the map
-		if (npc.getId() == NpcID.JALNIB || npc.getId() == NpcID.TZKALZUK)
+		// We'll ignore nibblers and jads, and zuk spawns off the map
+		if (npcId == NpcID.JALNIB || npcId == NpcID.JALTOKJAD || npcId == NpcID.TZKALZUK)
 		{
 			return;
 		}
@@ -412,6 +414,8 @@ public class InfernoStatsPlugin extends Plugin
 	@Subscribe
 	public void onChatMessage(ChatMessage event)
 	{
+		Matcher matcher;
+
 		final String message = event.getMessage();
 		if (event.getType() != ChatMessageType.SPAM && event.getType() != ChatMessageType.GAMEMESSAGE)
 		{
@@ -426,9 +430,12 @@ public class InfernoStatsPlugin extends Plugin
 		Wave wave = GetCurrentWave();
 		if (WaveTimer.DEFEATED_MESSAGE.matcher(message).matches())
 		{
+			waveTimer.Pause();
 			removeWaveTimer();
+
 			wave.Finished(true);
 			panel.updateWave(wave);
+
 			if (config.saveWaveTimes())
 			{
 				waveHistoryWriter.toFile(
@@ -437,6 +444,7 @@ public class InfernoStatsPlugin extends Plugin
 						waveHistory.ToCSV(false)
 				);
 			}
+
 			if (config.saveSplitTimes())
 			{
 				waveHistoryWriter.toFile(
@@ -445,14 +453,23 @@ public class InfernoStatsPlugin extends Plugin
 						waveHistory.ToCSV(true)
 				);
 			}
+
 			return;
 		}
 
-		if (WaveTimer.COMPLETE_MESSAGE.matcher(message).matches())
+		matcher = WaveTimer.COMPLETE_MESSAGE.matcher(message);
+		if (matcher.find())
 		{
+			// In case we ever update the filename (or anything else) to use KC
+			int killCount = Integer.parseInt(matcher.group(1));
+			log.debug("Parsed Killcount: {}", killCount);
+
+			waveTimer.Pause();
 			removeWaveTimer();
+
 			wave.Finished(false);
 			panel.updateWave(wave);
+
 			if (config.saveWaveTimes())
 			{
 				waveHistoryWriter.toFile(
@@ -461,6 +478,7 @@ public class InfernoStatsPlugin extends Plugin
 						waveHistory.ToCSV(false)
 				);
 			}
+
 			if (config.saveSplitTimes())
 			{
 				waveHistoryWriter.toFile(
@@ -469,6 +487,7 @@ public class InfernoStatsPlugin extends Plugin
 						waveHistory.ToCSV(true)
 				);
 			}
+
 			return;
 		}
 
@@ -498,7 +517,7 @@ public class InfernoStatsPlugin extends Plugin
 			}
 		}
 
-		Matcher matcher = WaveTimer.WAVE_MESSAGE.matcher(message);
+		matcher = WaveTimer.WAVE_MESSAGE.matcher(message);
 		if (matcher.find())
 		{
 			int waveId = Integer.parseInt(matcher.group(1));
@@ -717,11 +736,7 @@ public class InfernoStatsPlugin extends Plugin
 
 	private void removeWaveTimer()
 	{
-		if (waveTimer != null)
-		{
-			infoBoxManager.removeInfoBox(waveTimer);
-			waveTimer = null;
-		}
+		infoBoxManager.removeInfoBox(waveTimer);
 	}
 
 	public boolean isInInferno()

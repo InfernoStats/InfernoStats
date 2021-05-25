@@ -2,7 +2,6 @@ package com.infernostats.wavehistory;
 
 import com.infernostats.InfernoStatsPlugin;
 import net.runelite.client.ui.overlay.infobox.InfoBox;
-import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -14,8 +13,8 @@ public class WaveTimer extends InfoBox {
     public static final Pattern WAVE_MESSAGE = Pattern.compile("Wave: (\\d+)");
     public static final Pattern WAVE_COMPLETE_MESSAGE = Pattern.compile("Wave completed!");
     public static final Pattern DEFEATED_MESSAGE = Pattern.compile("You have been defeated!");
-    public static final Pattern COMPLETE_MESSAGE = Pattern.compile("Your (?:TzTok-Jad|TzKal-Zuk) kill count is:");
-    public static final Pattern PAUSED_MESSAGE = Pattern.compile("The (?:Inferno|Fight Cave) has been paused. You may now log out.");
+    public static final Pattern COMPLETE_MESSAGE = Pattern.compile("Your TzKal-Zuk kill count is: <col=ff0000>(\\d+)</col>.");
+    public static final Pattern PAUSED_MESSAGE = Pattern.compile("The Inferno has been paused. You may now log out.");
 
     public static Instant startTime;
     public static Instant lastTime;

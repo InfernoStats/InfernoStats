@@ -13,6 +13,7 @@ public class WaveHistoryWriter {
     public void toFile(String username, String filename, String contents)
     {
         File dir = new File(RUNELITE_DIR, "inferno-stats/" + username);
+
         dir.mkdirs();
 
         try (FileWriter fw = new FileWriter(new File(dir, filename)))
