@@ -187,7 +187,7 @@ public class Wave {
 
         StringBuilder sb = new StringBuilder();
 
-        sb.append("https://infernostats.github.io/inferno.html?");
+        sb.append("https://www.infernotrainer.com/?");
         for (Map.Entry<String, ArrayList<ArrayList<Integer>>> entry : mobs.entrySet())
         {
             sb.append(npc_names.get(entry.getKey()));
