@@ -195,8 +195,7 @@ public class Wave {
             sb.append(entry.getValue());
             sb.append("&");
         }
-        sb.deleteCharAt(sb.length()-1); // Remove trailing ampersand
-
+        sb.append("copyable");
         return sb.toString().replaceAll("\\s", "");
     }
 }
