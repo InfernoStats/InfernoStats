@@ -40,6 +40,7 @@ public class Wave {
     public Duration splitTime;
     public Duration predictedTime;
     public boolean forceReset;
+    public int idleTicks = 0;
 
     private static final List<Integer> SPLIT_WAVES = new ArrayList<Integer>() {{
         add(9);

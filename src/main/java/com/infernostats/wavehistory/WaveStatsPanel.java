@@ -1,5 +1,6 @@
 package com.infernostats.wavehistory;
 
+import com.infernostats.InfernoStatsConfig;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.ImageUtil;
@@ -28,8 +29,10 @@ public class WaveStatsPanel extends JPanel {
     public JLabel damageTaken;
     public JLabel prayerDrain;
     public JLabel damageDealt;
+    public JLabel idleTicks;
     public WaveImage imageLabel;
     private JPanel textPanel;
+    private InfernoStatsConfig config;
     private boolean repainted = false;
 
     private static final Border normalBorder = BorderFactory.createCompoundBorder(
@@ -42,7 +45,7 @@ public class WaveStatsPanel extends JPanel {
                         BorderFactory.createLineBorder(ColorScheme.DARKER_GRAY_HOVER_COLOR),
                         new EmptyBorder(3, 5, 3, 5)));
 
-    public WaveStatsPanel(Wave wave)
+    public WaveStatsPanel(InfernoStatsConfig config, Wave wave)
     {
         this.wave = wave;
         serializedLineOfSight = wave.SerializeWave();
@@ -120,10 +123,22 @@ public class WaveStatsPanel extends JPanel {
         damageDealt.setForeground(Color.WHITE);
         damageDealtLine.add(damageDealt, BorderLayout.WEST);
 
+        JPanel idleTicksLine = new JPanel();
+        idleTicksLine.setLayout(new BorderLayout());
+        idleTicksLine.setBackground(null);
+
+        idleTicks = new JLabel();
+        idleTicks.setText("Idle ticks: " + wave.idleTicks);
+        idleTicks.setForeground(Color.WHITE);
+        if (config.trackIdleTicks() && config.showIdleTicksInSidepanel()) {
+            idleTicksLine.add(idleTicks, BorderLayout.WEST);
+        }
+
         textPanel.add(durationLine);
         textPanel.add(damageTakenLine);
         textPanel.add(prayerDrainLine);
         textPanel.add(damageDealtLine);
+        textPanel.add(idleTicksLine);
 
         JPanel imagePanel = new JPanel();
         imagePanel.setLayout(new BoxLayout(imagePanel, BoxLayout.Y_AXIS));

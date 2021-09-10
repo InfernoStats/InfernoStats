@@ -318,4 +318,48 @@ public interface InfernoStatsConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigSection(
+			name = "Idle ticks",
+			description = "Settings around tracking player idle ticks",
+			position = 5,
+			closedByDefault = true
+	)
+	String idleTicks = "idleTicks";
+
+	@ConfigItem(
+			keyName = "trackIdleTicks",
+			name = "Track idle ticks",
+			description = "Track idle ticks, where the player is not attacking a live NPC",
+			position = 1,
+			section=idleTicks
+	)
+	default boolean trackIdleTicks()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = "showIdleTicksInSidepanel",
+			name = "Show idle ticks in sidepanel",
+			description = "Show idle ticks in the side panel",
+			position = 2,
+			section = idleTicks
+	)
+	default boolean showIdleTicksInSidepanel()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+			keyName = "showIdleTicksInChatbox",
+			name = "Show idle ticks in chatbox",
+			description = "Show idle ticks in the chat box",
+			position = 3,
+			section = idleTicks
+	)
+	default boolean showIdleTicksInChatbox()
+	{
+		return false;
+	}
 }
