@@ -4,19 +4,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import com.google.common.collect.Sets;
 import com.infernostats.InfernoStatsConfig;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.NPC;
 import net.runelite.api.Player;
-import net.runelite.api.MenuAction;
 import net.runelite.api.events.AnimationChanged;
 import net.runelite.api.events.GameTick;
-import net.runelite.client.events.OverlayMenuClicked;
 import net.runelite.api.kit.KitType;
-import net.runelite.client.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,12 +64,12 @@ public class TickCounter
 				{
 					delta = 0;
 					isBlowpiping = true;
-					logger.info("{} BP animation start", client.getTickCount());
+					logger.debug("{} BP animation start", client.getTickCount());
 				}
 				break;
 			case -1:
 				isBlowpiping = false;
-				logger.info("{} Clear blowpipe animation state", client.getTickCount());
+				logger.debug("{} Clear blowpipe animation state", client.getTickCount());
 				break;
 		}
 		if (delta > 0)
@@ -94,7 +90,7 @@ public class TickCounter
 			if (oldAttackableNpcs != null) {
 				Set<Integer> intersection = Sets.intersection(oldAttackableNpcs, attackableNpcs);
 				if (intersection.size() > 0) {
-					log.info("{} idle tick", client.getTickCount());
+					log.debug("{} idle tick", client.getTickCount());
 					++this.idleTicks;
 				}
 			}
@@ -102,7 +98,7 @@ public class TickCounter
 		if (isBlowpiping && client.getLocalPlayer().getAnimationFrame() == 0)
 		{
 			idleTickStartTimer = client.getTickCount() + BLOWPIPE_TICKS;
-			logger.info("{} BP animation started, +2 ticks ", client.getTickCount());
+			logger.debug("{} BP animation started, +2 ticks ", client.getTickCount());
 		}
 		prevInstance = instanced;
 		instanced = client.isInInstancedRegion();
@@ -152,16 +148,4 @@ public class TickCounter
 		}
 		return false;
 	}
-
-	@Subscribe
-	public void onOverlayMenuClicked(OverlayMenuClicked event)
-	{
-		if (event.getEntry().getMenuAction() == MenuAction.RUNELITE_OVERLAY &&
-			event.getEntry().getTarget().equals("Tick counter") &&
-			event.getEntry().getOption().equals("Reset"))
-		{
-			clearState();
-		}
-	}
-
 }

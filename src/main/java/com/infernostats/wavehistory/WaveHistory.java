@@ -1,7 +1,10 @@
 package com.infernostats.wavehistory;
 
+import com.google.inject.Inject;
+import com.infernostats.InfernoStatsConfig;
 import net.runelite.api.NPC;
 import net.runelite.api.coords.WorldPoint;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -10,11 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WaveHistory {
+    private InfernoStatsConfig config;
     public static List<Wave> waves;
 
-    public WaveHistory()
+    @Inject
+    public WaveHistory(InfernoStatsConfig config)
     {
-        waves = new ArrayList<>();
+        this.config = config;
+        this.waves = new ArrayList<>();
     }
 
     public void NewWave(int id, Duration splitTime)
@@ -38,19 +44,39 @@ public class WaveHistory {
         waves.clear();
     }
 
+    public int getTotalIdleTicks() {
+        int totalIdleTicks = waves.stream()
+                .map(wave -> wave.idleTicks)
+                .reduce(0, (prevVal, newVal) -> prevVal + newVal);
+        return totalIdleTicks;
+    }
+
     public String ToCSV(boolean splitWaves)
     {
         StringBuilder csv = new StringBuilder();
-        csv.append("wave,split,time\n");
+        csv.append("wave,split,time");
+        if (config.trackIdleTicks()) {
+            csv.append(",idle");
+        }
+        csv.append("\n");
 
         for (Wave wave : waves)
         {
             if (!splitWaves || (splitWaves && wave.IsSplit()))
             {
-                csv.append("" + wave.id + "," + wave.SplitTimeString() + "," + wave.WaveTimeString() + "\n");
+                csv.append("" + wave.id + "," + wave.SplitTimeString() + "," + wave.WaveTimeString());
+                if (config.trackIdleTicks()) {
+                    csv.append("," + wave.idleTicks);
+                }
+                csv.append("\n");
             }
         }
-
+        Wave lastWave = waves.get(waves.size() - 1);
+        csv.append("end," + lastWave.SplitTimeString() + "," + lastWave.SplitTimeString());
+        if(config.trackIdleTicks()) {
+            csv.append("," + getTotalIdleTicks());
+        }
+        csv.append("\n");
         return csv.toString();
     }
 

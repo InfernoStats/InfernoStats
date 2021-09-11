@@ -126,7 +126,7 @@ public class InfernoStatsPlugin extends Plugin
 	{
 		specialPercentage = -1;
 		prevMorUlRek = false;
-		waveHistory = new WaveHistory();
+		waveHistory = new WaveHistory(config);
 		waveHistoryWriter = new WaveHistoryWriter();
 		waveSplits = new WaveSplits(config);
 		tickCounter = new TickCounter(config);
@@ -219,6 +219,7 @@ public class InfernoStatsPlugin extends Plugin
 			// The user jumped into the inferno from Mor-Ul-Rek. Clear any existing infoboxes.
 			waveHistory.ClearWaves();
 			panel.ClearWaves();
+			tickCounter.clearState();
 			removeCounters();
 			removeWaveTimer();
 			prevMorUlRek = false;
@@ -446,8 +447,12 @@ public class InfernoStatsPlugin extends Plugin
 			waveTimer.Pause();
 			removeWaveTimer();
 
-			wave.Finished(true);
+			wave.Finished(waveTimer.SplitTime(), true);
 			panel.updateWave(wave);
+
+			if (config.trackIdleTicks() && config.showIdleTicksInChatbox()) {
+				writeIdleTicksToChatbox();
+			}
 
 			if (config.saveWaveTimes())
 			{
@@ -480,8 +485,12 @@ public class InfernoStatsPlugin extends Plugin
 			waveTimer.Pause();
 			removeWaveTimer();
 
-			wave.Finished(false);
+			wave.Finished(waveTimer.SplitTime(), false);
 			panel.updateWave(wave);
+
+			if (config.trackIdleTicks() && config.showIdleTicksInChatbox()) {
+				writeIdleTicksToChatbox();
+			}
 
 			if (config.saveWaveTimes())
 			{
@@ -507,13 +516,13 @@ public class InfernoStatsPlugin extends Plugin
 		if (WaveTimer.PAUSED_MESSAGE.matcher(message).find())
 		{
 			waveTimer.Pause();
-			wave.Finished(false);
+			wave.Finished(waveTimer.SplitTime(), false);
 			return;
 		}
 
 		if (WaveTimer.WAVE_COMPLETE_MESSAGE.matcher(message).find())
 		{
-			wave.Finished(false);
+			wave.Finished(waveTimer.SplitTime(), false);
 
 			if (config.trackIdleTicks() && config.showIdleTicksInChatbox()) {
 				final ChatMessageBuilder chatMessageBuilder = new ChatMessageBuilder()
@@ -605,6 +614,17 @@ public class InfernoStatsPlugin extends Plugin
 								.build());
 			}
 		}
+	}
+
+	private void writeIdleTicksToChatbox() {
+		final ChatMessageBuilder chatMessageBuilder = new ChatMessageBuilder()
+				.append(ChatColorType.HIGHLIGHT)
+				.append("Total ticks idle: " + waveHistory.getTotalIdleTicks());
+		chatMessageManager.queue(
+				QueuedMessage.builder()
+						.type(ChatMessageType.CONSOLE)
+						.runeLiteFormattedMessage(chatMessageBuilder.build())
+						.build());
 	}
 
 	@Subscribe
