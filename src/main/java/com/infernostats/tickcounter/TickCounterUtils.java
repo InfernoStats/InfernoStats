@@ -1,6 +1,15 @@
 package com.infernostats.tickcounter;
 
 public class TickCounterUtils {
+    /**
+     * Returns the number of ticks that an animation and/or weapon takes to attack with.
+     *
+     * Adapted from https://github.com/winterdaze/tick-counter
+     *
+     * @param animation The ID of the animation.
+     * @param weapon The ID of the weapon.
+     * @return Number of ticks for the given animation/weapon combination.
+     */
     public static int getTicksForAnimation(int animation, int weapon) {
         int delta;
         switch (animation)

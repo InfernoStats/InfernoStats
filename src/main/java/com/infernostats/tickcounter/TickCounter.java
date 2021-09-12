@@ -16,6 +16,9 @@ import net.runelite.api.kit.KitType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Adapted from https://github.com/winterdaze/tick-counter but changed to track only a single player.
+ */
 @Slf4j
 public class TickCounter
 {
