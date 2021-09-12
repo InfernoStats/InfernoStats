@@ -43,7 +43,7 @@ import static net.runelite.api.Skill.PRAYER;
 import static net.runelite.api.ItemID.INFERNAL_CAPE;
 
 @PluginDescriptor(
-		name = "Inferno Stats2",
+		name = "Inferno Stats",
 		description = "Track restoration specials during an inferno attempt.",
 		tags = {"combat", "npcs", "overlay"},
 		enabledByDefault = false
