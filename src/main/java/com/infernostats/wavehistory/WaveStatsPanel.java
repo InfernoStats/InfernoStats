@@ -128,9 +128,9 @@ public class WaveStatsPanel extends JPanel {
         idleTicksLine.setBackground(null);
 
         idleTicks = new JLabel();
-        idleTicks.setText("Idle ticks: " + wave.idleTicks);
+        idleTicks.setText("Idle Ticks: " + wave.idleTicks);
         idleTicks.setForeground(Color.WHITE);
-        if (config.trackIdleTicks() && config.showIdleTicksInSidepanel()) {
+        if (config.trackIdleTicks() && config.showIdleTicksInSidePanel()) {
             idleTicksLine.add(idleTicks, BorderLayout.WEST);
         }
 

@@ -253,13 +253,14 @@ public class InfernoStatsPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick event)
 	{
+		tickCounter.onGameTick(client, event);
+		// TODO(Supalosa): Move this up.
 		if (!isInInferno())
 		{
 			return;
 		}
 
 		Wave wave = GetCurrentWave();
-		tickCounter.onGameTick(client, event);
 		if (wave != null)
 		{
 			if (config.trackIdleTicks()) {
@@ -326,6 +327,11 @@ public class InfernoStatsPlugin extends Plugin
 	@Subscribe
 	public void onAnimationChanged(AnimationChanged e) {
 		tickCounter.onAnimationChanged(client, e);
+		// TODO(Supalosa): Move this up.
+		if (!isInInferno())
+		{
+			return;
+		}
 	}
 
 	@Subscribe
@@ -451,7 +457,7 @@ public class InfernoStatsPlugin extends Plugin
 			panel.updateWave(wave);
 
 			if (config.trackIdleTicks() && config.showIdleTicksInChatbox()) {
-				writeIdleTicksToChatbox();
+				writeTotalIdleTicksToChatbox();
 			}
 
 			if (config.saveWaveTimes())
@@ -489,7 +495,7 @@ public class InfernoStatsPlugin extends Plugin
 			panel.updateWave(wave);
 
 			if (config.trackIdleTicks() && config.showIdleTicksInChatbox()) {
-				writeIdleTicksToChatbox();
+				writeTotalIdleTicksToChatbox();
 			}
 
 			if (config.saveWaveTimes())
@@ -616,10 +622,10 @@ public class InfernoStatsPlugin extends Plugin
 		}
 	}
 
-	private void writeIdleTicksToChatbox() {
+	private void writeTotalIdleTicksToChatbox() {
 		final ChatMessageBuilder chatMessageBuilder = new ChatMessageBuilder()
 				.append(ChatColorType.HIGHLIGHT)
-				.append("Total ticks idle: " + waveHistory.getTotalIdleTicks());
+				.append("Total idle ticks in run: " + waveHistory.getTotalIdleTicks());
 		chatMessageManager.queue(
 				QueuedMessage.builder()
 						.type(ChatMessageType.CONSOLE)

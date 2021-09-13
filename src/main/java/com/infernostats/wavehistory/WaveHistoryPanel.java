@@ -77,7 +77,7 @@ public class WaveHistoryPanel extends PluginPanel {
                     panel.damageTaken.setText("Damage Taken: " + wave.damageTaken);
                     panel.prayerDrain.setText("Prayer Drain: " + wave.prayerDrain);
                     panel.damageDealt.setText("Damage Dealt: " + wave.damageDealt);
-                    panel.idleTicks.setText("Idle ticks: " + wave.idleTicks);
+                    panel.idleTicks.setText("Idle Ticks: " + wave.idleTicks);
                     panel.RedrawWaveSpawn();
                 }
             }

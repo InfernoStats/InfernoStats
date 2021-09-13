@@ -329,9 +329,9 @@ public interface InfernoStatsConfig extends Config
 
 	@ConfigItem(
 			keyName = "trackIdleTicks",
-			name = "Track idle ticks",
+			name = "Track Idle Ticks",
 			description = "Track idle ticks, where the player is not attacking a live NPC",
-			position = 1,
+			position = 0,
 			section=idleTicks
 	)
 	default boolean trackIdleTicks()
@@ -340,13 +340,13 @@ public interface InfernoStatsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "showIdleTicksInSidepanel",
+			keyName = "showIdleTicksInSidePanel",
 			name = "Show idle ticks in sidepanel",
 			description = "Show idle ticks in the side panel",
-			position = 2,
+			position = 1,
 			section = idleTicks
 	)
-	default boolean showIdleTicksInSidepanel()
+	default boolean showIdleTicksInSidePanel()
 	{
 		return true;
 	}
@@ -355,7 +355,7 @@ public interface InfernoStatsConfig extends Config
 			keyName = "showIdleTicksInChatbox",
 			name = "Show idle ticks in chatbox",
 			description = "Show idle ticks in the chat box",
-			position = 3,
+			position = 2,
 			section = idleTicks
 	)
 	default boolean showIdleTicksInChatbox()
