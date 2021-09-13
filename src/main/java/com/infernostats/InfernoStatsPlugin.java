@@ -253,12 +253,11 @@ public class InfernoStatsPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick event)
 	{
-		tickCounter.onGameTick(client, event);
-		// TODO(Supalosa): Move this up.
 		if (!isInInferno())
 		{
 			return;
 		}
+		tickCounter.onGameTick(client, event);
 
 		Wave wave = GetCurrentWave();
 		if (wave != null)
@@ -326,12 +325,11 @@ public class InfernoStatsPlugin extends Plugin
 
 	@Subscribe
 	public void onAnimationChanged(AnimationChanged e) {
-		tickCounter.onAnimationChanged(client, e);
-		// TODO(Supalosa): Move this up.
 		if (!isInInferno())
 		{
 			return;
 		}
+		tickCounter.onAnimationChanged(client, e);
 	}
 
 	@Subscribe
