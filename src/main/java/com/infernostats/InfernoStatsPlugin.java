@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provides;
 import com.infernostats.specialweapon.SpecialWeapon;
 import com.infernostats.specialweapon.SpecialWeaponStats;
+import com.infernostats.tickcounter.TickCounter;
 import com.infernostats.wavehistory.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -59,6 +60,7 @@ public class InfernoStatsPlugin extends Plugin
 	private WaveHistoryWriter waveHistoryWriter;
 	private WaveSplits waveSplits;
 	private SpecialWeapon specialWeapon;
+	private TickCounter tickCounter;
 
 	private static final String CONFIG_GROUP = "infernostats";
 	private static final String HIDE_KEY = "hide";
@@ -124,9 +126,10 @@ public class InfernoStatsPlugin extends Plugin
 	{
 		specialPercentage = -1;
 		prevMorUlRek = false;
-		waveHistory = new WaveHistory();
+		waveHistory = new WaveHistory(config);
 		waveHistoryWriter = new WaveHistoryWriter();
 		waveSplits = new WaveSplits(config);
+		tickCounter = new TickCounter(config);
 
 		panel = injector.getInstance(WaveHistoryPanel.class);
 		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/blob-square.png");
@@ -216,6 +219,7 @@ public class InfernoStatsPlugin extends Plugin
 			// The user jumped into the inferno from Mor-Ul-Rek. Clear any existing infoboxes.
 			waveHistory.ClearWaves();
 			panel.ClearWaves();
+			tickCounter.clearState();
 			removeCounters();
 			removeWaveTimer();
 			prevMorUlRek = false;
@@ -253,14 +257,19 @@ public class InfernoStatsPlugin extends Plugin
 		{
 			return;
 		}
+		tickCounter.onGameTick(client, event);
 
 		Wave wave = GetCurrentWave();
 		if (wave != null)
 		{
+			if (config.trackIdleTicks()) {
+				wave.idleTicks = tickCounter.getIdleTicks();
+			}
 			panel.updateWave(wave);
 		}
 
 		currPrayer = client.getBoostedSkillLevel(PRAYER);
+
 
 		if (lastSpecTick != client.getTickCount())
 		{
@@ -312,6 +321,15 @@ public class InfernoStatsPlugin extends Plugin
 				wave.prayerDrain += 1;
 			}
 		}
+	}
+
+	@Subscribe
+	public void onAnimationChanged(AnimationChanged e) {
+		if (!isInInferno())
+		{
+			return;
+		}
+		tickCounter.onAnimationChanged(client, e);
 	}
 
 	@Subscribe
@@ -433,8 +451,12 @@ public class InfernoStatsPlugin extends Plugin
 			waveTimer.Pause();
 			removeWaveTimer();
 
-			wave.Finished(true);
+			wave.Finished(waveTimer.SplitTime(), true);
 			panel.updateWave(wave);
+
+			if (config.trackIdleTicks() && config.showIdleTicksInChatbox()) {
+				writeTotalIdleTicksToChatbox();
+			}
 
 			if (config.saveWaveTimes())
 			{
@@ -467,8 +489,12 @@ public class InfernoStatsPlugin extends Plugin
 			waveTimer.Pause();
 			removeWaveTimer();
 
-			wave.Finished(false);
+			wave.Finished(waveTimer.SplitTime(), false);
 			panel.updateWave(wave);
+
+			if (config.trackIdleTicks() && config.showIdleTicksInChatbox()) {
+				writeTotalIdleTicksToChatbox();
+			}
 
 			if (config.saveWaveTimes())
 			{
@@ -494,13 +520,24 @@ public class InfernoStatsPlugin extends Plugin
 		if (WaveTimer.PAUSED_MESSAGE.matcher(message).find())
 		{
 			waveTimer.Pause();
-			wave.Finished(false);
+			wave.Finished(waveTimer.SplitTime(), false);
 			return;
 		}
 
 		if (WaveTimer.WAVE_COMPLETE_MESSAGE.matcher(message).find())
 		{
-			wave.Finished(false);
+			wave.Finished(waveTimer.SplitTime(), false);
+
+			if (config.trackIdleTicks() && config.showIdleTicksInChatbox()) {
+				final ChatMessageBuilder chatMessageBuilder = new ChatMessageBuilder()
+						.append(ChatColorType.HIGHLIGHT)
+						.append("Ticks lost on Wave " + wave.id + ": " + wave.idleTicks);
+				chatMessageManager.queue(
+						QueuedMessage.builder()
+								.type(ChatMessageType.CONSOLE)
+								.runeLiteFormattedMessage(chatMessageBuilder.build())
+								.build());
+			}
 
 			if (config.waveTimes())
 			{
@@ -539,6 +576,8 @@ public class InfernoStatsPlugin extends Plugin
 			}
 
 			waveHistory.NewWave(waveId, waveTimer.SplitTime());
+			tickCounter.clearState();
+			tickCounter.startIdleTimer(client.getTickCount());
 
 			wave = GetCurrentWave();
 			panel.addWave(wave);
@@ -579,6 +618,17 @@ public class InfernoStatsPlugin extends Plugin
 								.build());
 			}
 		}
+	}
+
+	private void writeTotalIdleTicksToChatbox() {
+		final ChatMessageBuilder chatMessageBuilder = new ChatMessageBuilder()
+				.append(ChatColorType.HIGHLIGHT)
+				.append("Total idle ticks in run: " + waveHistory.getTotalIdleTicks());
+		chatMessageManager.queue(
+				QueuedMessage.builder()
+						.type(ChatMessageType.CONSOLE)
+						.runeLiteFormattedMessage(chatMessageBuilder.build())
+						.build());
 	}
 
 	@Subscribe

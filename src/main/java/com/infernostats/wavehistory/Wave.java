@@ -39,7 +39,9 @@ public class Wave {
     public Instant stopTime;
     public Duration splitTime;
     public Duration predictedTime;
+    public Duration waveEndSplit;
     public boolean forceReset;
+    public int idleTicks = 0;
 
     private static final List<Integer> SPLIT_WAVES = new ArrayList<Integer>() {{
         add(9);
@@ -81,8 +83,9 @@ public class Wave {
         this.forceReset = false;
     }
 
-    public void Finished(boolean failed)
+    public void Finished(Duration waveEndSplit, boolean failed)
     {
+        this.waveEndSplit = waveEndSplit;
         this.failed = failed;
         stopTime = Instant.now();
     }
