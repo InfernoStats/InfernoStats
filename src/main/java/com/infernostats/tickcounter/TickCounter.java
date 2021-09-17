@@ -91,7 +91,7 @@ public class TickCounter
 	{
 		Player player = client.getLocalPlayer();
 		int weaponId = player.getPlayerComposition().getEquipmentId(KitType.WEAPON);
-		log.info("{} Player is holding weapon {}", client.getTickCount(), weaponId);
+		log.debug("{} Player is holding weapon {}", client.getTickCount(), weaponId);
 		if (animationUpdate.isPresent()) {
 			handleAnimationChange(client, animationUpdate.get(), weaponId);
 			animationUpdate = Optional.empty();
@@ -133,7 +133,7 @@ public class TickCounter
 	}
 
 	public void clearState() {
-		log.info("Clearing state for TickCounter");
+		log.debug("Clearing state for TickCounter");
 		idleTicks = 0;
 		idleTickStartTimer = Integer.MAX_VALUE;
 		isBlowpiping = false;
