@@ -2,6 +2,7 @@ package com.infernostats.wavehistory;
 
 import com.google.inject.Inject;
 import com.infernostats.InfernoStatsConfig;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.NPC;
 import net.runelite.api.coords.WorldPoint;
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class WaveHistory {
     private InfernoStatsConfig config;
     public static List<Wave> waves;
@@ -72,7 +74,9 @@ public class WaveHistory {
             }
         }
         Wave lastWave = waves.get(waves.size() - 1);
-        csv.append("end," + lastWave.SplitTimeString() + "," + lastWave.SplitTimeString());
+        log.debug("Final wave SplitTimeString: {}, CurrentTimeString: {}", lastWave.SplitTimeString(),
+                lastWave.CurrentTimeString());
+        csv.append("end," + lastWave.CurrentTimeString() + "," + lastWave.CurrentTimeString());
         if(config.trackIdleTicks()) {
             csv.append("," + getTotalIdleTicks());
         }
