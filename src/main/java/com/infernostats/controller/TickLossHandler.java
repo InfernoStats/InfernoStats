@@ -32,6 +32,8 @@ public class TickLossHandler {
 	private Animation prevAnim;
 	private Set<Integer> attackableNpcs;
 
+	private static final int SPELLBOOK_VARBIT = 4070;
+
 	@Inject
 	private Client client;
 
@@ -72,6 +74,10 @@ public class TickLossHandler {
 			return;
 
 		this.magicXp = newMagicXp;
+
+		// Standard (0), Ancient (1), Lunar (2), Arceuus (3)
+		if (this.client.getVarbitValue(SPELLBOOK_VARBIT) != 1)
+			return;
 
 		// Ghost barrage occurred
 		if (this.prevAnim == Animation.BLOWPIPE)
@@ -148,6 +154,9 @@ public class TickLossHandler {
 
 	private int getAnimationDelay(Animation animation, int weapon) {
 		switch (animation) {
+			case IDLE:
+			case THRALL:
+			case DEATH_CHARGE:
 			case BLOWPIPE:
 				switch (weapon) {
 					case ItemID.CHINCHOMPA:
@@ -239,7 +248,9 @@ public class TickLossHandler {
 		CHINCHOMPA(7618),
 		SURGE(7855),
 		SCYTHE(8056),
-		RAPIER(8145);
+		RAPIER(8145),
+		DEATH_CHARGE(8970),
+		THRALL(8973);
 
 		private final int id;
 
