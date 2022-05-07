@@ -141,7 +141,7 @@ public class WaveStatsPanel extends JPanel {
 		textPanel.add(damageDealtLine);
 		textPanel.add(prayerDrainLine);
 
-		if (config.trackIdleTicks() && config.showIdleTicksInSidePanel())
+		if (config.showIdleTicksInSidePanel())
 			textPanel.add(idleTicksLine);
 
 		JPanel imagePanel = new JPanel();

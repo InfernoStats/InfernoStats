@@ -149,6 +149,23 @@ public interface InfernoStatsConfig extends Config {
 		return true;
 	}
 
+	@AllArgsConstructor
+	enum FileType {
+		TEXT,
+		CSV
+	}
+
+	@ConfigItem(
+			position = 5,
+			keyName = "splitsFileType",
+			name = "Splits File Type",
+			description = "File type to save splits as",
+			section = waveAndSplitTimes
+	)
+	default FileType splitsFileType() {
+		return FileType.TEXT;
+	}
+
 	@ConfigSection(
 			name = "Target Split Times",
 			description = "Split times that you wish to achieve",
@@ -320,21 +337,10 @@ public interface InfernoStatsConfig extends Config {
 	String idleTicks = "idleTicks";
 
 	@ConfigItem(
-			keyName = "trackIdleTicks",
-			name = "Track Idle Ticks",
-			description = "Track idle ticks, where the player is not attacking a live NPC",
-			position = 0,
-			section = idleTicks
-	)
-	default boolean trackIdleTicks() {
-		return false;
-	}
-
-	@ConfigItem(
 			keyName = "showIdleTicksInSidePanel",
 			name = "Show Idle Ticks in Side Panel",
 			description = "Show idle ticks in the side panel",
-			position = 1,
+			position = 0,
 			section = idleTicks
 	)
 	default boolean showIdleTicksInSidePanel() {
@@ -345,7 +351,7 @@ public interface InfernoStatsConfig extends Config {
 			keyName = "showIdleTicksInChatbox",
 			name = "Show Idle Ticks in Chatbox",
 			description = "Show idle ticks in the chat box",
-			position = 2,
+			position = 1,
 			section = idleTicks
 	)
 	default boolean showIdleTicksInChatbox() {

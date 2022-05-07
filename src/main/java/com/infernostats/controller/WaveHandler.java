@@ -80,11 +80,27 @@ public class WaveHandler {
 				return;
 
 			if (config.saveWaveTimes()) {
-				toFile(player.getName(), csvName(false), toCSV(false));
+				switch (config.splitsFileType())
+				{
+					case TEXT:
+						toFile(player.getName(), fileName(false), toText(false));
+						break;
+					case CSV:
+						toFile(player.getName(), fileName(false), toCSV(false));
+						break;
+				}
 			}
 
 			if (config.saveSplitTimes()) {
-				toFile(player.getName(), csvName(true), toCSV(true));
+				switch (config.splitsFileType())
+				{
+					case TEXT:
+						toFile(player.getName(), fileName(true), toText(true));
+						break;
+					case CSV:
+						toFile(player.getName(), fileName(true), toCSV(true));
+						break;
+				}
 			}
 
 			waves.clear();
@@ -145,11 +161,65 @@ public class WaveHandler {
 		}
 	}
 
+	public String toText(boolean splitWaves) {
+		StringBuilder text = new StringBuilder();
+
+		if (splitWaves)
+		{
+			Wave prev = null;
+			for (Wave wave : waves) {
+				if (!wave.isSplit())
+					continue;
+
+				text.append("Wave: ").append(wave.getId())
+						.append(", ")
+						.append("Split: ").append(TimeFormatting.getSplitTime(wave))
+						.append(", ")
+						.append("Delta: ").append(TimeFormatting.getSplitDelta(wave, prev))
+						.append("\n");
+
+				prev = wave;
+			}
+		}
+		else
+		{
+			for (Wave wave : waves) {
+				text.append("Wave: ").append(wave.getId())
+						.append(", ")
+						.append("Split: ").append(TimeFormatting.getSplitTime(wave))
+						.append("\n");
+			}
+		}
+
+		if (waves.isEmpty()) {
+			text.append("Duration (Not Started): N/a");
+			return text.toString();
+		}
+
+		Wave wave = waves.get(waves.size() - 1);
+		String duration = TimeFormatting.getCurrentTotalTime(wave);
+		switch (wave.getState()) {
+			case FINISHED:
+				if (wave.getId() == 69) {
+					text.append("Duration (Success): ").append(duration);
+					break;
+				} else { /* fallthrough */ }
+			case STARTED:
+				text.append("Duration (Unfinished): ").append(duration);
+				break;
+			case FAILED:
+				text.append("Duration (Failed): ").append(duration);
+				break;
+		}
+
+		return text.toString();
+	}
+
 	public String toCSV(boolean splitWaves) {
 		StringBuilder csv = new StringBuilder();
 
 		if (splitWaves) {
-			csv.append("wave,split,time,delta\n");
+			csv.append("wave,split,time,delta,idle\n");
 
 			Wave prev = null;
 			for (Wave wave : waves) {
@@ -163,12 +233,14 @@ public class WaveHandler {
 						.append(TimeFormatting.getCurrentWaveTime(wave))
 						.append(",")
 						.append(TimeFormatting.getSplitDelta(wave, prev))
+						.append(",")
+						.append(wave.getIdleTicks())
 						.append("\n");
 
 				prev = wave;
 			}
 		} else {
-			csv.append("wave,split,time\n");
+			csv.append("wave,split,time,idle\n");
 
 			for (Wave wave : waves) {
 				csv.append(wave.getId())
@@ -176,6 +248,8 @@ public class WaveHandler {
 						.append(TimeFormatting.getSplitTime(wave))
 						.append(",")
 						.append(TimeFormatting.getCurrentWaveTime(wave))
+						.append(",")
+						.append(wave.getIdleTicks())
 						.append("\n");
 			}
 		}
@@ -183,8 +257,14 @@ public class WaveHandler {
 		return csv.toString();
 	}
 
-	public String csvName(boolean splitWaves) {
-		String wavesText = splitWaves ? "Splits.csv" : "Full.csv";
+	public String fileName(boolean splitWaves) {
+		String extension = "";
+		if (config.splitsFileType() == InfernoStatsConfig.FileType.CSV)
+			extension = ".csv";
+		else if (config.splitsFileType() == InfernoStatsConfig.FileType.TEXT)
+			extension = ".txt";
+
+		String wavesText = (splitWaves ? "Splits" : "Full") + extension;
 
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss");
 		String timeText = formatter.format(LocalDateTime.now());
