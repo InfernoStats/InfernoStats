@@ -33,6 +33,7 @@ import static net.runelite.client.RuneLite.RUNELITE_DIR;
 public class WaveHandler {
 	@Getter
 	private Wave wave;
+	@Getter
 	private final ArrayList<Wave> waves;
 
 	@Inject
@@ -64,47 +65,17 @@ public class WaveHandler {
 			this.wave.setDuration(this.wave.getDuration() + 1);
 	}
 
-	@Subscribe
+	@Subscribe(priority = 1)
 	protected void onWaveStartedEvent(WaveStartedEvent e) {
 		this.wave = e.getWave();
+		if (this.wave.getId() == 1)
+			waves.clear();
 		this.waves.add(this.wave);
 	}
 
-	@Subscribe
+	@Subscribe(priority = 1)
 	protected void onWaveFinishedEvent(WaveFinishedEvent e) {
 		this.wave.setState(e.getState());
-
-		if (isRunCompleted(this.wave.getId(), e.getState())) {
-			Player player = client.getLocalPlayer();
-			if (player == null)
-				return;
-
-			if (config.saveWaveTimes()) {
-				switch (config.splitsFileType())
-				{
-					case TEXT:
-						toFile(player.getName(), fileName(false), toText(false));
-						break;
-					case CSV:
-						toFile(player.getName(), fileName(false), toCSV(false));
-						break;
-				}
-			}
-
-			if (config.saveSplitTimes()) {
-				switch (config.splitsFileType())
-				{
-					case TEXT:
-						toFile(player.getName(), fileName(true), toText(true));
-						break;
-					case CSV:
-						toFile(player.getName(), fileName(true), toCSV(true));
-						break;
-				}
-			}
-
-			waves.clear();
-		}
 	}
 
 	@Subscribe
@@ -152,6 +123,37 @@ public class WaveHandler {
 		}
 	}
 
+	public void WriteWaves()
+	{
+		Player player = client.getLocalPlayer();
+		if (player == null)
+			return;
+
+		if (config.saveWaveTimes()) {
+			switch (config.splitsFileType())
+			{
+				case TEXT:
+					toFile(player.getName(), fileName(false), toText(false));
+					break;
+				case CSV:
+					toFile(player.getName(), fileName(false), toCSV(false));
+					break;
+			}
+		}
+
+		if (config.saveSplitTimes()) {
+			switch (config.splitsFileType())
+			{
+				case TEXT:
+					toFile(player.getName(), fileName(true), toText(true));
+					break;
+				case CSV:
+					toFile(player.getName(), fileName(true), toCSV(true));
+					break;
+			}
+		}
+	}
+
 	private void toFile(String username, String filename, String contents) {
 		try {
 			Path path = Files.createDirectories(Paths.get(RUNELITE_DIR.getPath(), "inferno-stats", username));
@@ -161,8 +163,9 @@ public class WaveHandler {
 		}
 	}
 
-	public String toText(boolean splitWaves) {
+	private String toText(boolean splitWaves) {
 		StringBuilder text = new StringBuilder();
+		ArrayList<Wave> waves = this.getWaves();
 
 		if (splitWaves)
 		{
@@ -196,16 +199,14 @@ public class WaveHandler {
 			return text.toString();
 		}
 
-		Wave wave = waves.get(waves.size() - 1);
 		String duration = TimeFormatting.getCurrentTotalTime(wave);
 		switch (wave.getState()) {
 			case FINISHED:
-				if (wave.getId() == 69) {
-					text.append("Duration (Success): ").append(duration);
-					break;
-				} else { /* fallthrough */ }
 			case STARTED:
 				text.append("Duration (Unfinished): ").append(duration);
+				break;
+			case SUCCESS:
+				text.append("Duration (Success): ").append(duration);
 				break;
 			case FAILED:
 				text.append("Duration (Failed): ").append(duration);
@@ -228,11 +229,11 @@ public class WaveHandler {
 
 				csv.append(wave.getId())
 						.append(",")
-						.append(TimeFormatting.getSplitTime(wave))
+						.append(TimeFormatting.getSplitTimeCSV(wave))
 						.append(",")
-						.append(TimeFormatting.getCurrentWaveTime(wave))
+						.append(TimeFormatting.getCurrentWaveTimeCSV(wave))
 						.append(",")
-						.append(TimeFormatting.getSplitDelta(wave, prev))
+						.append(TimeFormatting.getSplitDeltaCSV(wave, prev))
 						.append(",")
 						.append(wave.getIdleTicks())
 						.append("\n");
@@ -245,9 +246,9 @@ public class WaveHandler {
 			for (Wave wave : waves) {
 				csv.append(wave.getId())
 						.append(",")
-						.append(TimeFormatting.getSplitTime(wave))
+						.append(TimeFormatting.getSplitTimeCSV(wave))
 						.append(",")
-						.append(TimeFormatting.getCurrentWaveTime(wave))
+						.append(TimeFormatting.getCurrentWaveTimeCSV(wave))
 						.append(",")
 						.append(wave.getIdleTicks())
 						.append("\n");
@@ -269,16 +270,12 @@ public class WaveHandler {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss");
 		String timeText = formatter.format(LocalDateTime.now());
 
-		switch (this.wave.getState()) {
-			case FINISHED:
-				return timeText + " Successful KC on Wave " + this.wave.getId() + ", " + wavesText;
+		switch (wave.getState()) {
+			case SUCCESS:
+				return timeText + " Successful KC on Wave " + wave.getId() + ", " + wavesText;
 			case FAILED:
 			default:
-				return timeText + " Failed KC on Wave " + this.wave.getId() + ", " + wavesText;
+				return timeText + " Failed KC on Wave " + wave.getId() + ", " + wavesText;
 		}
-	}
-
-	private boolean isRunCompleted(final int waveId, WaveState state) {
-		return waveId == 69 && state == WaveState.FINISHED || state == WaveState.FAILED;
 	}
 }

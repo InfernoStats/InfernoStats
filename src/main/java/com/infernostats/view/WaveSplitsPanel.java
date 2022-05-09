@@ -1,6 +1,7 @@
 package com.infernostats.view;
 
 import com.infernostats.model.Wave;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.ColorScheme;
 
@@ -19,7 +20,9 @@ import java.util.Map;
 @Slf4j
 public class WaveSplitsPanel extends JPanel {
 	private final JLabel titleLabel = new JLabel();
-	private final ArrayList<Wave> waveHistory = new ArrayList<>();
+
+	@Setter
+	private ArrayList<Wave> waves = null;
 
 	@Inject
 	public WaveSplitsPanel() {
@@ -80,7 +83,7 @@ public class WaveSplitsPanel extends JPanel {
 		StringBuilder splits = new StringBuilder();
 
 		Wave prev = null;
-		for (Wave wave : waveHistory) {
+		for (Wave wave : waves) {
 			if (!wave.isSplit())
 				continue;
 
@@ -94,21 +97,21 @@ public class WaveSplitsPanel extends JPanel {
 			prev = wave;
 		}
 
-		if (waveHistory.isEmpty()) {
+		if (waves.isEmpty()) {
 			splits.append("Duration (Not Started): N/a");
 			return splits.toString();
 		}
 
-		Wave wave = waveHistory.get(waveHistory.size() - 1);
+		Wave wave = waves.get(waves.size() - 1);
 		String duration = TimeFormatting.getCurrentTotalTime(wave);
+
 		switch (wave.getState()) {
 			case FINISHED:
-				if (wave.getId() == 69) {
-					splits.append("Duration (Success): ").append(duration);
-					break;
-				} else { /* fallthrough */ }
 			case STARTED:
 				splits.append("Duration (Unfinished): ").append(duration);
+				break;
+			case SUCCESS:
+				splits.append("Duration (Success): ").append(duration);
 				break;
 			case FAILED:
 				splits.append("Duration (Failed): ").append(duration);
@@ -116,11 +119,5 @@ public class WaveSplitsPanel extends JPanel {
 		}
 
 		return splits.toString();
-	}
-
-	public void AddWave(Wave wave) {
-		if (wave.getId() == 1)
-			this.waveHistory.clear();
-		this.waveHistory.add(wave);
 	}
 }

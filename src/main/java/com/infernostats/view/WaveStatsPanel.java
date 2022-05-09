@@ -197,20 +197,20 @@ public class WaveStatsPanel extends JPanel {
 	public void RedrawWaveSpawn() {
 		Map<String, ArrayList<ArrayList<Integer>>> mobs = remapNPCs();
 		ImmutableMap<String, Integer> mob_sizes = new ImmutableMap.Builder<String, Integer>()
-			.put("Jal-MejRah", 2)
-			.put("Jal-Ak", 3)
-			.put("Jal-ImKot", 4)
-			.put("Jal-Xil", 3)
-			.put("Jal-Zek", 4)
-			.build();
+				.put("Jal-MejRah", 2)
+				.put("Jal-Ak", 3)
+				.put("Jal-ImKot", 4)
+				.put("Jal-Xil", 3)
+				.put("Jal-Zek", 4)
+				.build();
 
 		ImmutableMap<String, Color> mob_colors = new ImmutableMap.Builder<String, Color>()
-			.put("Jal-MejRah", Color.GRAY)
-			.put("Jal-Ak", Color.YELLOW)
-			.put("Jal-ImKot", Color.ORANGE)
-			.put("Jal-Xil", Color.GREEN)
-			.put("Jal-Zek", Color.RED)
-			.build();
+				.put("Jal-MejRah", Color.GRAY)
+				.put("Jal-Ak", Color.YELLOW)
+				.put("Jal-ImKot", Color.ORANGE)
+				.put("Jal-Xil", Color.GREEN)
+				.put("Jal-Zek", Color.RED)
+				.build();
 
 		for (Map.Entry<String, ArrayList<ArrayList<Integer>>> entry : mobs.entrySet()) {
 			final String name = entry.getKey();
@@ -234,12 +234,12 @@ public class WaveStatsPanel extends JPanel {
 
 		// Map in-game names to website parameter names
 		ImmutableMap<String, String> npc_names = new ImmutableMap.Builder<String, String>()
-			.put("Jal-MejRah", "bat")
-			.put("Jal-Ak", "blob")
-			.put("Jal-ImKot", "melee")
-			.put("Jal-Xil", "ranger")
-			.put("Jal-Zek", "mager")
-			.build();
+				.put("Jal-MejRah", "bat")
+				.put("Jal-Ak", "blob")
+				.put("Jal-ImKot", "melee")
+				.put("Jal-Xil", "ranger")
+				.put("Jal-Zek", "mager")
+				.build();
 
 		StringBuilder sb = new StringBuilder();
 
@@ -282,6 +282,9 @@ public class WaveStatsPanel extends JPanel {
 			case FINISHED:
 			case STARTED:
 				this.getWaveNumber().setForeground(Color.WHITE);
+				break;
+			case SUCCESS:
+				this.getWaveNumber().setForeground(Color.GREEN);
 				break;
 			case FAILED:
 				this.getWaveNumber().setForeground(Color.RED);

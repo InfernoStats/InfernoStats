@@ -33,11 +33,11 @@ public class InfernoStatsPanel extends PluginPanel {
 		add(this.titlePanel, BorderLayout.NORTH, 0);
 		add(this.waveSplitsPanel, BorderLayout.CENTER, 1);
 		add(this.waveListContainer, BorderLayout.SOUTH, 2);
+
+		waveSplitsPanel.setWaves(this.plugin.getWaves());
 	}
 
 	void AddWave(Wave wave) {
-		this.waveSplitsPanel.AddWave(wave);
-
 		SwingUtilities.invokeLater(() ->
 		{
 			waveStatsPanel = new WaveStatsPanel(config, wave);

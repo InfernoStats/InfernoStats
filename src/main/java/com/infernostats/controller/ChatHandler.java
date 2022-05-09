@@ -56,13 +56,13 @@ public class ChatHandler {
 		}
 
 		if (message.equals(TZHAAR_DEFEATED_MESSAGE)) {
-			eventBus.post(new WaveFinishedEvent(WaveState.FAILED));
+			eventBus.post(new RunCompletedEvent(WaveState.FAILED));
 			eventBus.post(new TimerStoppedEvent());
 			return;
 		}
 
-		if (TZHAAR_COMPLETED_MESSAGE.matcher(message).matches()) {
-			eventBus.post(new WaveFinishedEvent(WaveState.FINISHED));
+		if (TZHAAR_COMPLETED_MESSAGE.matcher(message).find()) {
+			eventBus.post(new RunCompletedEvent(WaveState.SUCCESS));
 			eventBus.post(new TimerStoppedEvent());
 			return;
 		}
@@ -159,4 +159,3 @@ public class ChatHandler {
 		}
 	}
 }
-

@@ -31,6 +31,8 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import javax.inject.Inject;
 
+import java.util.ArrayList;
+
 import static net.runelite.api.ItemID.FIRE_CAPE;
 import static net.runelite.api.ItemID.INFERNAL_CAPE;
 
@@ -180,6 +182,12 @@ public class InfernoStatsPlugin extends Plugin {
 	}
 
 	@Subscribe
+	protected void onGameTick(GameTick e) {
+		if (isInInferno())
+			this.panel.UpdateWave();
+	}
+
+	@Subscribe
 	protected void onWaveStartedEvent(WaveStartedEvent e) {
 		Wave wave = e.getWave();
 		if (wave.getId() == 1)
@@ -193,9 +201,12 @@ public class InfernoStatsPlugin extends Plugin {
 	}
 
 	@Subscribe
-	protected void onGameTick(GameTick e) {
-		if (isInInferno())
-			this.panel.UpdateWave();
+	protected void onRunCompletedEvent(RunCompletedEvent e) {
+		Wave wave = this.getCurrentWave();
+		wave.setState(e.getState());
+
+		this.panel.UpdateWave();
+		this.waveHandler.WriteWaves();
 	}
 
 	@Subscribe
@@ -231,6 +242,10 @@ public class InfernoStatsPlugin extends Plugin {
 
 	public Wave getCurrentWave() {
 		return waveHandler.getWave();
+	}
+
+	public ArrayList<Wave> getWaves() {
+		return waveHandler.getWaves();
 	}
 
 	public TimerHandler.TimerState getTimerState() {
