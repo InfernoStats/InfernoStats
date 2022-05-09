@@ -14,6 +14,7 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.HitsplatApplied;
 import net.runelite.api.events.NpcSpawned;
+import net.runelite.api.events.StatChanged;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 
@@ -27,6 +28,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
+import static net.runelite.api.Skill.PRAYER;
 import static net.runelite.client.RuneLite.RUNELITE_DIR;
 
 @Slf4j
@@ -35,6 +37,8 @@ public class WaveHandler {
 	private Wave wave;
 	@Getter
 	private final ArrayList<Wave> waves;
+
+	private int prayer;
 
 	@Inject
 	private Client client;
@@ -63,6 +67,23 @@ public class WaveHandler {
 
 		if (this.plugin.getTimerState() == TimerHandler.TimerState.RUNNING)
 			this.wave.setDuration(this.wave.getDuration() + 1);
+
+		prayer = client.getBoostedSkillLevel(PRAYER);
+	}
+
+	@Subscribe
+	public void onStatChanged(StatChanged event) {
+		if (!this.plugin.isInInferno() || this.wave == null)
+			return;
+
+		if (this.wave.getState() != WaveState.STARTED)
+			return;
+
+		if (event.getSkill() != PRAYER)
+			return;
+
+		if (event.getBoostedLevel() == prayer - 1)
+			wave.setPrayerDrain(wave.getPrayerDrain() + 1);
 	}
 
 	@Subscribe(priority = 1)
