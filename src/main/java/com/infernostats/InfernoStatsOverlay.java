@@ -1,6 +1,7 @@
 package com.infernostats;
 
 import com.infernostats.controller.TimerHandler;
+import com.infernostats.model.Location;
 import com.infernostats.model.Wave;
 import com.infernostats.view.TimeFormatting;
 import net.runelite.client.ui.ColorScheme;
@@ -34,7 +35,7 @@ public class InfernoStatsOverlay extends OverlayPanel {
 
 	@Override
 	public Dimension render(Graphics2D graphics) {
-		if (!this.plugin.isInInferno())
+		if (!this.plugin.isInInferno() && !this.plugin.isInFightCaves())
 			return null;
 
 		panelComponent.getChildren().clear();
@@ -46,18 +47,20 @@ public class InfernoStatsOverlay extends OverlayPanel {
 		if (this.plugin.getTimerState() != TimerHandler.TimerState.RUNNING)
 			return null;
 
-		if (wave.isSplit())
-			prevSplitWave = wave;
-
 		String header = "Current Wave: " + wave.getId();
 		LinkedHashMap<String, String> contents = new LinkedHashMap<>();
+
+		if (wave.isSplit())
+			prevSplitWave = wave;
 
 		if (prevSplitWave != null) {
 			if (config.splitTimes()) {
 				contents.put("Wave " + prevSplitWave.getId() + " Split: ", TimeFormatting.getSplitTime(prevSplitWave));
 			}
 
-			if (config.predictedCompletionTime() && prevSplitWave.getPace() != null) {
+			if ((prevSplitWave.getLocation() == Location.INFERNO) &&
+				(config.predictedCompletionTime() && prevSplitWave.getPace() != null))
+			{
 				contents.put("Predicted Time: ", TimeFormatting.formatDuration(prevSplitWave.getPace()));
 			}
 		}

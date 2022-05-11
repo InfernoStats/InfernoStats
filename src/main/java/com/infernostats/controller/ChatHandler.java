@@ -3,6 +3,7 @@ package com.infernostats.controller;
 import com.infernostats.InfernoStatsConfig;
 import com.infernostats.InfernoStatsPlugin;
 import com.infernostats.events.*;
+import com.infernostats.model.Location;
 import com.infernostats.model.Wave;
 import com.infernostats.model.WaveSplit;
 import com.infernostats.model.WaveState;
@@ -121,6 +122,12 @@ public class ChatHandler {
 				eventBus.post(new TimerStartedEvent(0));
 			}
 
+			if (this.plugin.isInInferno()) {
+				wave.setLocation(Location.INFERNO);
+			} else {
+				wave.setLocation(Location.FIGHT_CAVES);
+			}
+
 			eventBus.post(new WaveStartedEvent(wave));
 
 			if (config.splitTimes() && wave.isSplit()) {
@@ -143,6 +150,9 @@ public class ChatHandler {
 			}
 
 			if (config.predictedCompletionTime() && wave.isSplit()) {
+				if (wave.getLocation() == Location.FIGHT_CAVES)
+					return;
+
 				wave.setPace(WaveSplit.PredictedTime(wave));
 
 				final String predictedMessage = new ChatMessageBuilder()

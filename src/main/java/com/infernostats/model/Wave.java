@@ -23,9 +23,14 @@ public class Wave {
 	private int idleTicks;
 	private WaveState state;
 	private Duration pace;
+	private Location location;
 
 	private static final Set<Integer> SPLIT_WAVES = ImmutableSet.of(
 			9, 18, 25, 35, 42, 50, 57, 60, 63, 66, 67, 68, 69
+	);
+
+	private static final Set<Integer> FIGHT_CAVE_SPLIT_WAVES = ImmutableSet.of(
+			7, 15, 31, 46, 53, 61, 62, 63
 	);
 
 	public Wave(int id, long start) {
@@ -46,7 +51,14 @@ public class Wave {
 	}
 
 	public boolean isSplit() {
-		return SPLIT_WAVES.contains(this.getId());
+		switch (location)
+		{
+			case FIGHT_CAVES:
+				return FIGHT_CAVE_SPLIT_WAVES.contains(this.getId());
+			default:
+			case INFERNO:
+				return SPLIT_WAVES.contains(this.getId());
+		}
 	}
 
 	public Duration duration() {

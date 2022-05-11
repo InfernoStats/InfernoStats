@@ -5,9 +5,11 @@ import com.infernostats.InfernoStatsPlugin;
 import com.infernostats.events.WaveFinishedEvent;
 import com.infernostats.events.WaveStartedEvent;
 import com.infernostats.model.Wave;
+import com.infernostats.model.Location;
 import com.infernostats.model.WaveState;
 import com.infernostats.view.TimeFormatting;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
@@ -35,6 +37,11 @@ import static net.runelite.client.RuneLite.RUNELITE_DIR;
 public class WaveHandler {
 	@Getter
 	private Wave wave;
+
+	@Getter
+	@Setter
+	private Location location;
+
 	@Getter
 	private final ArrayList<Wave> waves;
 
@@ -59,7 +66,7 @@ public class WaveHandler {
 
 	@Subscribe
 	protected void onGameTick(GameTick e) {
-		if (!this.plugin.isInInferno() || this.wave == null)
+		if ((!this.plugin.isInInferno() && !this.plugin.isInFightCaves()) || this.wave == null)
 			return;
 
 		if (this.wave.getState() != WaveState.STARTED)
@@ -73,7 +80,7 @@ public class WaveHandler {
 
 	@Subscribe
 	public void onStatChanged(StatChanged event) {
-		if (!this.plugin.isInInferno() || this.wave == null)
+		if ((!this.plugin.isInInferno() && !this.plugin.isInFightCaves()) || this.wave == null)
 			return;
 
 		if (this.wave.getState() != WaveState.STARTED)
@@ -88,6 +95,11 @@ public class WaveHandler {
 
 	@Subscribe(priority = 1)
 	protected void onWaveStartedEvent(WaveStartedEvent e) {
+		if (this.plugin.isInInferno())
+			setLocation(Location.INFERNO);
+		else if (this.plugin.isInFightCaves())
+			setLocation(Location.FIGHT_CAVES);
+
 		this.wave = e.getWave();
 		if (this.wave.getId() == 1)
 			waves.clear();
@@ -129,7 +141,7 @@ public class WaveHandler {
 		Actor target = event.getActor();
 		Hitsplat hitsplat = event.getHitsplat();
 
-		if (!this.plugin.isInInferno() || this.wave == null)
+		if ((!this.plugin.isInInferno() && !this.plugin.isInFightCaves()) || this.wave == null)
 			return;
 
 		if (!hitsplat.isMine())
@@ -150,14 +162,17 @@ public class WaveHandler {
 		if (player == null)
 			return;
 
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss");
+		String time = formatter.format(LocalDateTime.now());
+
 		if (config.saveWaveTimes()) {
 			switch (config.splitsFileType())
 			{
 				case TEXT:
-					toFile(player.getName(), fileName(false), toText(false));
+					toFile(player.getName(), fileName(time, false), toText(false));
 					break;
 				case CSV:
-					toFile(player.getName(), fileName(false), toCSV(false));
+					toFile(player.getName(), fileName(time, false), toCSV(false));
 					break;
 			}
 		}
@@ -166,10 +181,10 @@ public class WaveHandler {
 			switch (config.splitsFileType())
 			{
 				case TEXT:
-					toFile(player.getName(), fileName(true), toText(true));
+					toFile(player.getName(), fileName(time, true), toText(true));
 					break;
 				case CSV:
-					toFile(player.getName(), fileName(true), toCSV(true));
+					toFile(player.getName(), fileName(time, true), toCSV(true));
 					break;
 			}
 		}
@@ -177,7 +192,18 @@ public class WaveHandler {
 
 	private void toFile(String username, String filename, String contents) {
 		try {
-			Path path = Files.createDirectories(Paths.get(RUNELITE_DIR.getPath(), "inferno-stats", username));
+			Path path = null;
+			switch (this.wave.getLocation())
+			{
+				case FIGHT_CAVES:
+					path = Files.createDirectories(Paths.get(
+						RUNELITE_DIR.getPath(), "inferno-stats", username, "fight-caves"));
+					break;
+				case INFERNO:
+					path = Files.createDirectories(Paths.get(
+						RUNELITE_DIR.getPath(), "inferno-stats", username, "inferno"));
+					break;
+			}
 			Files.write(path.resolve(filename), contents.getBytes());
 		} catch (IOException ex) {
 			log.debug("Error writing file: {}", ex.getMessage());
@@ -237,7 +263,7 @@ public class WaveHandler {
 		return text.toString();
 	}
 
-	public String toCSV(boolean splitWaves) {
+	private String toCSV(boolean splitWaves) {
 		StringBuilder csv = new StringBuilder();
 
 		if (splitWaves) {
@@ -279,24 +305,27 @@ public class WaveHandler {
 		return csv.toString();
 	}
 
-	public String fileName(boolean splitWaves) {
-		String extension = "";
-		if (config.splitsFileType() == InfernoStatsConfig.FileType.CSV)
-			extension = ".csv";
-		else if (config.splitsFileType() == InfernoStatsConfig.FileType.TEXT)
-			extension = ".txt";
-
-		String wavesText = (splitWaves ? "Splits" : "Full") + extension;
-
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss");
-		String timeText = formatter.format(LocalDateTime.now());
+	private String fileName(String time, boolean splitWaves) {
+		String wavesText = (splitWaves ? "Splits" : "Full") + getExtension();
 
 		switch (wave.getState()) {
 			case SUCCESS:
-				return timeText + " Successful KC on Wave " + wave.getId() + ", " + wavesText;
+				return time + " Successful KC on Wave " + wave.getId() + ", " + wavesText;
 			case FAILED:
 			default:
-				return timeText + " Failed KC on Wave " + wave.getId() + ", " + wavesText;
+				return time + " Failed KC on Wave " + wave.getId() + ", " + wavesText;
+		}
+	}
+
+	private String getExtension()
+	{
+		switch (config.splitsFileType())
+		{
+			case CSV:
+				return ".csv";
+			default:
+			case TEXT:
+				return ".txt";
 		}
 	}
 }

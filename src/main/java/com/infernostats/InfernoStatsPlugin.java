@@ -169,7 +169,7 @@ public class InfernoStatsPlugin extends Plugin {
 				if (timerHandler.getState() == TimerHandler.TimerState.RUNNING)
 					if (!isInFightCaves() && !isInInferno()) {
 						eventBus.post(new TimerStoppedEvent());
-						eventBus.post(new WaveFinishedEvent(WaveState.FAILED));
+						eventBus.post(new RunCompletedEvent(WaveState.FAILED));
 					}
 				resetNav();
 				break;
@@ -183,7 +183,7 @@ public class InfernoStatsPlugin extends Plugin {
 
 	@Subscribe
 	protected void onGameTick(GameTick e) {
-		if (isInInferno())
+		if (isInInferno() || isInFightCaves())
 			this.panel.UpdateWave();
 	}
 
