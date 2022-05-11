@@ -21,7 +21,7 @@ public interface InfernoStatsConfig extends Config {
 
 	@ConfigItem(
 			position = 0,
-			keyName = "showStatsOverlay",
+			keyName = "splitsOverlay",
 			name = "Splits Overlay",
 			description = "Displays an overlay with the wave number and splits/predicted time.",
 			section = overlays
