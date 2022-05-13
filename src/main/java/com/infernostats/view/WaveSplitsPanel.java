@@ -90,8 +90,8 @@ public class WaveSplitsPanel extends JPanel {
 			splits.append("Wave: ").append(wave.getId())
 					.append(", ")
 					.append("Split: ").append(TimeFormatting.getSplitTime(wave))
-					.append(", ")
-					.append("Delta: ").append(TimeFormatting.getSplitDelta(wave, prev))
+					.append(" ")
+					.append("(+").append(TimeFormatting.getSplitDelta(wave, prev)).append(")")
 					.append("\n");
 
 			prev = wave;

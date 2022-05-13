@@ -111,6 +111,7 @@ public class ChatHandler {
 			Wave wave = new Wave(waveId, this.plugin.getRunDuration());
 
 			if (wave.getId() == 1) {
+				wave.setDuration(0);
 				if (this.plugin.isInInferno()) {
 					// The first wave message is 10 ticks after the timer starts
 					eventBus.post(new TimerStartedEvent(10));
@@ -124,7 +125,7 @@ public class ChatHandler {
 
 			if (this.plugin.isInInferno()) {
 				wave.setLocation(Location.INFERNO);
-			} else {
+			} else if (this.plugin.isInFightCaves()) {
 				wave.setLocation(Location.FIGHT_CAVES);
 			}
 
