@@ -148,11 +148,9 @@ public class WaveHandler {
 			return;
 
 		if (target == this.client.getLocalPlayer()) {
-			if (hitsplat.getHitsplatType() == Hitsplat.HitsplatType.DAMAGE_ME)
-				this.wave.setDamageTaken(this.wave.getDamageTaken() + hitsplat.getAmount());
+			this.wave.setDamageTaken(this.wave.getDamageTaken() + hitsplat.getAmount());
 		} else {
-			if (hitsplat.getHitsplatType() == Hitsplat.HitsplatType.DAMAGE_ME)
-				this.wave.setDamageDealt(this.wave.getDamageDealt() + hitsplat.getAmount());
+			this.wave.setDamageDealt(this.wave.getDamageDealt() + hitsplat.getAmount());
 		}
 	}
 
