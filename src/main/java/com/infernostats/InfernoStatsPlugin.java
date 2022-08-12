@@ -60,6 +60,7 @@ public class InfernoStatsPlugin extends Plugin {
 	private TimerHandler timerHandler;
 
 	@Inject
+	@Getter(AccessLevel.PACKAGE)
 	private WaveHandler waveHandler;
 
 	@Inject

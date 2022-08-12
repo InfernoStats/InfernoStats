@@ -208,14 +208,20 @@ public class WaveHandler {
 		}
 	}
 
-	private String toText(boolean splitWaves) {
+	public String toText(boolean splitWaves) {
 		StringBuilder text = new StringBuilder();
 		ArrayList<Wave> waves = this.getWaves();
 
 		if (splitWaves)
 		{
+			int prevIdleTicks = 0, totalIdleTicks = 0;
+			int prevDamageTaken = 0, totalDamageTaken = 0;
+
 			Wave prev = null;
 			for (Wave wave : waves) {
+				totalIdleTicks += wave.getIdleTicks();
+				totalDamageTaken += wave.getDamageTaken();
+
 				if (!wave.isSplit())
 					continue;
 
@@ -223,8 +229,29 @@ public class WaveHandler {
 						.append(", ")
 						.append("Split: ").append(TimeFormatting.getSplitTime(wave))
 						.append(" ")
-						.append("(+").append(TimeFormatting.getSplitDelta(wave, prev)).append(")")
-						.append("\n");
+						.append("(+").append(TimeFormatting.getSplitDelta(wave, prev)).append(")");
+
+				if (config.includeIdleTicksInSplits())
+				{
+					text.append(", ")
+						.append("Idle: ").append(totalIdleTicks)
+						.append(" ")
+						.append("(+").append(totalIdleTicks - prevIdleTicks).append(")");
+
+					prevIdleTicks = totalIdleTicks;
+				}
+
+				if (config.includeDamageTakenInSplits())
+				{
+					text.append(", ")
+						.append("Damage: ").append(totalDamageTaken)
+						.append(" ")
+						.append("(+").append(totalDamageTaken - prevDamageTaken).append(")");
+
+					prevDamageTaken = totalDamageTaken;
+				}
+
+				text.append("\n");
 
 				prev = wave;
 			}
@@ -261,11 +288,11 @@ public class WaveHandler {
 		return text.toString();
 	}
 
-	private String toCSV(boolean splitWaves) {
+	public String toCSV(boolean splitWaves) {
 		StringBuilder csv = new StringBuilder();
 
 		if (splitWaves) {
-			csv.append("wave,split,time,delta,idle\n");
+			csv.append("wave,split,time,delta,idle,damage\n");
 
 			Wave prev = null;
 			for (Wave wave : waves) {
@@ -281,12 +308,14 @@ public class WaveHandler {
 						.append(TimeFormatting.getSplitDeltaCSV(wave, prev))
 						.append(",")
 						.append(wave.getIdleTicks())
+						.append(",")
+						.append(wave.getDamageTaken())
 						.append("\n");
 
 				prev = wave;
 			}
 		} else {
-			csv.append("wave,split,time,idle\n");
+			csv.append("wave,split,time,idle,damage\n");
 
 			for (Wave wave : waves) {
 				csv.append(wave.getId())
@@ -296,6 +325,8 @@ public class WaveHandler {
 						.append(TimeFormatting.getCurrentWaveTimeCSV(wave))
 						.append(",")
 						.append(wave.getIdleTicks())
+						.append(",")
+						.append(wave.getDamageTaken())
 						.append("\n");
 			}
 		}
