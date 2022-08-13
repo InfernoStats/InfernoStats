@@ -1,7 +1,6 @@
 package com.infernostats.view;
 
 import com.infernostats.controller.WaveHandler;
-import com.infernostats.model.Wave;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.ColorScheme;
@@ -56,7 +55,7 @@ public class WaveSplitsPanel extends JPanel {
 				Toolkit.getDefaultToolkit()
 						.getSystemClipboard()
 						.setContents(
-								new StringSelection(getWaveData()),
+								new StringSelection(WaveSplitTimes()),
 								null
 						);
 			}
@@ -79,7 +78,7 @@ public class WaveSplitsPanel extends JPanel {
 		label.setFont(font.deriveFont(attributes));
 	}
 
-	private String getWaveData() {
+	private String WaveSplitTimes() {
 		return waveHandler.toText(true);
 	}
 }

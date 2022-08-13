@@ -212,11 +212,11 @@ public class WaveHandler {
 		StringBuilder text = new StringBuilder();
 		ArrayList<Wave> waves = this.getWaves();
 
+		int prevIdleTicks = 0, totalIdleTicks = 0;
+		int prevDamageTaken = 0, totalDamageTaken = 0;
+
 		if (splitWaves)
 		{
-			int prevIdleTicks = 0, totalIdleTicks = 0;
-			int prevDamageTaken = 0, totalDamageTaken = 0;
-
 			Wave prev = null;
 			for (Wave wave : waves) {
 				totalIdleTicks += wave.getIdleTicks();
@@ -259,6 +259,9 @@ public class WaveHandler {
 		else
 		{
 			for (Wave wave : waves) {
+				totalIdleTicks += wave.getIdleTicks();
+				totalDamageTaken += wave.getDamageTaken();
+
 				text.append("Wave: ").append(wave.getId())
 						.append(", ")
 						.append("Split: ").append(TimeFormatting.getSplitTime(wave))
@@ -283,6 +286,16 @@ public class WaveHandler {
 			case FAILED:
 				text.append("Duration (Failed): ").append(duration);
 				break;
+		}
+
+		if (config.includeIdleTicksInSplits())
+		{
+			text.append(", ").append("Idle: ").append(totalIdleTicks);
+		}
+
+		if (config.includeDamageTakenInSplits())
+		{
+			text.append(", ").append("Damage: ").append(totalDamageTaken);
 		}
 
 		return text.toString();
