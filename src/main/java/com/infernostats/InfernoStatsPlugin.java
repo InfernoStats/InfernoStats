@@ -39,8 +39,7 @@ import static net.runelite.api.ItemID.INFERNAL_CAPE;
 @PluginDescriptor(
 		name = "Inferno Stats",
 		description = "Track restoration specials during an inferno attempt.",
-		tags = {"combat", "npcs", "overlay"},
-		enabledByDefault = false
+		tags = {"combat", "npcs", "overlay"}
 )
 @Slf4j
 public class InfernoStatsPlugin extends Plugin {

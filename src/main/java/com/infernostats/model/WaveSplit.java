@@ -96,7 +96,7 @@ public final class WaveSplit {
 				return pace;
 			}
 		}
-		return Pace.SUB50;
+		return Pace.SUB45;
 	}
 
 	private static float percentOfAvgTime(Wave wave, Pace pace) {
@@ -142,7 +142,8 @@ public final class WaveSplit {
 		SUB75,
 		SUB60,
 		SUB55,
-		SUB50
+		SUB50,
+		SUB45
 	}
 
 	// The spreadsheet represents milliseconds as a fraction of 60.
@@ -160,84 +161,98 @@ public final class WaveSplit {
 					splitTime(2, 48, 45),
 					splitTime(2, 38, 42),
 					splitTime(2, 34, 59),
+					splitTime(2, 21, 0),
 			},
 			{ // Wave 18
 					splitTime(8, 6, 12),
 					splitTime(7, 9, 58),
 					splitTime(6, 32, 1),
 					splitTime(6, 21, 27),
+					splitTime(5, 43, 0),
 			},
 			{ // Wave 25
 					splitTime(12, 38, 5),
 					splitTime(11, 10, 54),
 					splitTime(10, 20, 25),
 					splitTime(9, 59, 32),
+					splitTime(8, 51, 0),
 			},
 			{ // Wave 35
 					splitTime(19, 59, 27),
 					splitTime(17, 51, 11),
 					splitTime(16, 18, 36),
 					splitTime(15, 49, 34),
+					splitTime(14, 1, 0),
 			},
 			{ // Wave 42
 					splitTime(26, 4, 23),
 					splitTime(23, 13, 13),
 					splitTime(21, 10, 40),
 					splitTime(20, 31, 8),
+					splitTime(18, 9, 0),
 			},
 			{ // Wave 50
 					splitTime(34, 44, 58),
 					splitTime(30, 42, 4),
 					splitTime(27, 57, 20),
 					splitTime(27, 0, 28),
+					splitTime(23, 50, 0),
 			},
 			{ // Wave 57
 					splitTime(43, 6, 49),
 					splitTime(37, 53, 26),
 					splitTime(34, 21, 23),
 					splitTime(33, 5, 17),
+					splitTime(29, 8, 0),
 			},
 			{ // Wave 60
 					splitTime(46, 49, 1),
 					splitTime(41, 5, 58),
 					splitTime(37, 11, 41),
 					splitTime(35, 53, 1),
+					splitTime(31, 35, 0),
 			},
 			{ // Wave 63
 					splitTime(51, 29, 49),
 					splitTime(44, 57, 13),
 					splitTime(40, 36, 18),
 					splitTime(39, 2, 40),
+					splitTime(34, 28, 0),
 			},
 			{ // Wave 66
 					splitTime(56, 2, 37),
 					splitTime(48, 36, 32),
 					splitTime(43, 53, 21),
 					splitTime(42, 6, 38),
+					splitTime(37, 13, 0),
 			},
 			{ // Wave 67
 					splitTime(56, 52, 39),
 					splitTime(49, 27, 4),
 					splitTime(44, 40, 34),
 					splitTime(42, 51, 37),
+					splitTime(37, 56, 0),
 			},
 			{ // Wave 68
 					splitTime(58, 6, 13),
 					splitTime(50, 28, 47),
 					splitTime(45, 37, 21),
 					splitTime(43, 43, 28),
+					splitTime(38, 41, 0),
 			},
 			{ // Wave 69
 					splitTime(61, 14, 23),
 					splitTime(53, 3, 33),
 					splitTime(48, 11, 44),
 					splitTime(46, 9, 11),
+					splitTime(40, 53, 0),
 			},
 			{ // Finish
 					splitTime(67, 6, 6),
 					splitTime(57, 39, 56),
 					splitTime(51, 42, 17),
 					splitTime(49, 15, 59),
+					splitTime(43, 43, 0),
 			},
 	};
 }
