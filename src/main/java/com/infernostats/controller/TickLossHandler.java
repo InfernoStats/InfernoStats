@@ -185,7 +185,22 @@ public class TickLossHandler {
 			case TRIDENT_SANG:
 				return 3;
 			case BOW:
-				return weapon == ItemID.TWISTED_BOW ? 5 : 3;
+				switch (weapon) {
+					case ItemId.TWISTED_BOW:
+						return 5;
+					case ItemId.BOW_OF_FAERDHINEN:
+					case ItemId.BOW_OF_FAERDHINEN_C:
+					case ItemId.BOW_OF_FAERDHINEN_C_25884:
+					case ItemId.BOW_OF_FAERDHINEN_C_25886:
+					case ItemId.BOW_OF_FAERDHINEN_C_25888:
+					case ItemId.BOW_OF_FAERDHINEN_C_25890:
+					case ItemId.BOW_OF_FAERDHINEN_C_25892:
+					case ItemId.BOW_OF_FAERDHINEN_C_25894:
+					case ItemId.BOW_OF_FAERDHINEN_C_25896:
+						return 4;
+					default:
+						return 3;
+				}
 			case SURGE:
 				return weapon == ItemID.HARMONISED_NIGHTMARE_STAFF ? 4 : 5;
 			case STAFF_BASH:
