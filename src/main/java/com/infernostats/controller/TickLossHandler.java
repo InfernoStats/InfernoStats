@@ -186,17 +186,17 @@ public class TickLossHandler {
 				return 3;
 			case BOW:
 				switch (weapon) {
-					case ItemId.TWISTED_BOW:
+					case ItemID.TWISTED_BOW:
 						return 5;
-					case ItemId.BOW_OF_FAERDHINEN:
-					case ItemId.BOW_OF_FAERDHINEN_C:
-					case ItemId.BOW_OF_FAERDHINEN_C_25884:
-					case ItemId.BOW_OF_FAERDHINEN_C_25886:
-					case ItemId.BOW_OF_FAERDHINEN_C_25888:
-					case ItemId.BOW_OF_FAERDHINEN_C_25890:
-					case ItemId.BOW_OF_FAERDHINEN_C_25892:
-					case ItemId.BOW_OF_FAERDHINEN_C_25894:
-					case ItemId.BOW_OF_FAERDHINEN_C_25896:
+					case ItemID.BOW_OF_FAERDHINEN:
+					case ItemID.BOW_OF_FAERDHINEN_C:
+					case ItemID.BOW_OF_FAERDHINEN_C_25884:
+					case ItemID.BOW_OF_FAERDHINEN_C_25886:
+					case ItemID.BOW_OF_FAERDHINEN_C_25888:
+					case ItemID.BOW_OF_FAERDHINEN_C_25890:
+					case ItemID.BOW_OF_FAERDHINEN_C_25892:
+					case ItemID.BOW_OF_FAERDHINEN_C_25894:
+					case ItemID.BOW_OF_FAERDHINEN_C_25896:
 						return 4;
 					default:
 						return 3;
