@@ -34,7 +34,7 @@ public class InfernoStatsPanel extends PluginPanel {
 		add(this.waveSplitsPanel, BorderLayout.CENTER, 1);
 		add(this.waveListContainer, BorderLayout.SOUTH, 2);
 
-		waveSplitsPanel.setWaves(this.plugin.getWaves());
+		waveSplitsPanel.setWaveHandler(this.plugin.getWaveHandler());
 	}
 
 	void AddWave(Wave wave) {
