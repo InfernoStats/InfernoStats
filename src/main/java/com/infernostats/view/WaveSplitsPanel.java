@@ -1,6 +1,7 @@
 package com.infernostats.view;
 
 import com.infernostats.model.Wave;
+import com.infernostats.controller.WaveHandler;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.ColorScheme;
@@ -92,6 +93,9 @@ public class WaveSplitsPanel extends JPanel {
 					.append("Split: ").append(TimeFormatting.getSplitTime(wave))
 					.append(" ")
 					.append("(+").append(TimeFormatting.getSplitDelta(wave, prev)).append(")")
+					.append(idleTicksToText(wave))
+					.append(WaveHandler.idleTicksToText(true, wave))
+					.append(WaveHandler.damageTakenToText(true, wave))
 					.append("\n");
 
 			prev = wave;
@@ -116,6 +120,16 @@ public class WaveSplitsPanel extends JPanel {
 			case FAILED:
 				splits.append("Duration (Failed): ").append(duration);
 				break;
+		}
+
+		if (config.showIdleTicksInSplitsFile())
+		{
+			text.append(", Total Idle Ticks: ").append(SOMETHING_HERE);
+		}
+
+		if (config.showDamageTakenInSplitsFile())
+		{
+			text.append(", Total Damage Taken: ").append(SOMETHING_HERE);
 		}
 
 		return splits.toString();

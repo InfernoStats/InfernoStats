@@ -212,7 +212,7 @@ public class WaveHandler {
 		StringBuilder text = new StringBuilder();
 		ArrayList<Wave> waves = this.getWaves();
 
-		if (splitWaves)
+		if (splitWaves) // only record the important splits
 		{
 			Wave prev = null;
 			for (Wave wave : waves) {
@@ -224,17 +224,21 @@ public class WaveHandler {
 						.append("Split: ").append(TimeFormatting.getSplitTime(wave))
 						.append(" ")
 						.append("(+").append(TimeFormatting.getSplitDelta(wave, prev)).append(")")
+						.append(idleTicksToText(true, wave))
+						.append(damageTakenToText(true, wave))
 						.append("\n");
 
 				prev = wave;
 			}
 		}
-		else
+		else // record every single wave
 		{
 			for (Wave wave : waves) {
 				text.append("Wave: ").append(wave.getId())
 						.append(", ")
 						.append("Split: ").append(TimeFormatting.getSplitTime(wave))
+						.append(idleTicksToText(false, wave))
+						.append(damageTakenToText(false, wave))
 						.append("\n");
 			}
 		}
@@ -258,15 +262,74 @@ public class WaveHandler {
 				break;
 		}
 
+		if (config.showIdleTicksInSplitsFile())
+		{
+			text.append(", Total Idle Ticks: ").append(SOMETHING_HERE);
+		}
+
+		if (config.showDamageTakenInSplitsFile())
+		{
+			text.append(", Total Damage Taken: ").append(SOMETHING_HERE);
+		}
+
 		return text.toString();
+
+		private String idleTicksToText(boolean isSplitWavesEnabled, Wave wave) {
+			/*
+			 * Wave: 9, Split: 02:58 (+02:58), Idle: 28 (+28)
+			 * Wave: 18, Split: 07:36 (+04:37), Idle: 71 (+43)
+			 */
+			if (!config.showIdleTicksInSplitsFile()) return "" // return nothing if the user doesnt want idle ticks to show up in splits file
+
+			StringBuilder text = new StringBuilder();
+			text.append(", ")
+					.append("Idle: ")
+					.append(SOMETHING_HERE); // total idle ticks so far
+
+			if (isSplitWavesEnabled)
+			{
+				text.append(" ")
+						.append("(+")
+						.append(SOMETHING_HERE) // delta idle ticks (idle ticks just for the current split)
+						.append(")");
+			}
+
+			return text.toString();
+		}
+
+		private String damageTakenToText(boolean isSplitWavesEnabled, Wave wave) {
+			/*
+			 * Wave: 9, Split: 02:58 (+02:58), Damage Taken: 23 (+23)
+			 * Wave 18: Split: 07:36 (+04:37), Damage Taken: 41 (+18)
+			 */
+			if (!config.showDamageTakenInSplitsFile()) return "" // return nothing if the user doesnt want damage taken to show up in splits file
+
+			StringBuilder text = new StringBuilder();
+			text.append(", ").append("Damage Taken: ").append(SOMETHING_HERE); // total damage taken so far
+
+			if (isSplitWavesEnabled)
+			{
+				text.append(" ")
+					.append("(+")
+					.append(SOMETHING_HERE) // delta damage taken (damage taken just for the current split)
+					.append(")");
+			}
+		}
 	}
 
 	private String toCSV(boolean splitWaves) {
 		StringBuilder csv = new StringBuilder();
 
 		if (splitWaves) {
-			csv.append("wave,split,time,delta,idle\n");
+			// Header
+			csv.append("wave,split,time,delta");
+			if (config.showIdleTicksInSplitsFile())
+				csv.append(",idle,deltaidle");
+			if (config.showDamageTakenInSplitsFile())
+				csv.append(",damagetaken,deltadamagetaken");
+			csv.append("\n")
 
+			// Content
 			Wave prev = null;
 			for (Wave wave : waves) {
 				if (!wave.isSplit())
@@ -280,14 +343,23 @@ public class WaveHandler {
 						.append(",")
 						.append(TimeFormatting.getSplitDeltaCSV(wave, prev))
 						.append(",")
-						.append(wave.getIdleTicks())
+						//.append(wave.getIdleTicks())
+						.append(idleTicksToCSV(true, wave))
+						.append(damageTakenToCSV(true, wave))
 						.append("\n");
 
 				prev = wave;
 			}
 		} else {
-			csv.append("wave,split,time,idle\n");
+			// Header
+			csv.append("wave,split,time");
+			if (config.showIdleTicksInSplitsFile())
+				csv.append(",idle");
+			if (config.showDamageTakenInSplitsFile())
+				csv.append(",damagetaken");
+			csv.append("\n");
 
+			// Content
 			for (Wave wave : waves) {
 				csv.append(wave.getId())
 						.append(",")
@@ -295,12 +367,42 @@ public class WaveHandler {
 						.append(",")
 						.append(TimeFormatting.getCurrentWaveTimeCSV(wave))
 						.append(",")
-						.append(wave.getIdleTicks())
+						//.append(wave.getIdleTicks())
+						.append(idleTicksToCSV(false, wave))
+						.append(damageTakenToCSV(false, wave))
 						.append("\n");
 			}
 		}
 
 		return csv.toString();
+
+		private String idleTicksToCSV(Boolean deltaTimesEnabled, Wave wave) {
+			if (!config.showIdleTicksInSplitsFile()) return "" // return nothing if the user doesnt want idle ticks to show up in splits file
+
+			StringBuilder text = new StringBuilder();
+			text.append(",").append(SOMETHING_HERE); // total idle ticks so far
+
+			if (deltaTimesEnabled)
+			{
+				text.append(",").append(SOMETHING_HERE); // delta idle ticks (idle ticks just for the current split)
+			}
+
+			return text.toString();
+		}
+
+		private String damageTakenToCSV(Boolean deltaTimesEnabled, Wave wave) {
+			if (!config.showDamageTakenInSplitsFile()) return "" // return nothing if the user doesnt want damage taken to show up in splits file
+
+			StringBuilder text = new StringBuilder();
+			text.append(",").append(SOMETHING_HERE); // total damage taken so far
+
+			if (deltaTimesEnabled)
+			{
+				text.append(",").append(SOMETHING_HERE); // delta damage taken (damage taken just for the current split)
+			}
+
+			return text.toString();
+		}
 	}
 
 	private String fileName(String time, boolean splitWaves) {
