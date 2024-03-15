@@ -33,6 +33,8 @@ public class TickLossHandler {
 	private Set<Integer> attackableNpcs;
 
 	private static final int SPELLBOOK_VARBIT = 4070;
+	private static final Set<TickLossHandler.Animation> blowpipeAnimations = Set.of(
+		Animation.BLOWPIPE, Animation.BLOWPIPE_BLAZING);
 
 	@Inject
 	private Client client;
@@ -80,7 +82,7 @@ public class TickLossHandler {
 			return;
 
 		// Ghost barrage occurred
-		if (this.prevAnim == Animation.BLOWPIPE)
+		if (blowpipeAnimations.contains(this.prevAnim))
 			this.tickDelay += 5;
 	}
 
@@ -105,9 +107,9 @@ public class TickLossHandler {
 		this.prevAnim = this.currAnim;
 		this.currAnim = Animation.valueOf(player.getAnimation());
 
-		if (this.prevAnim != Animation.BLOWPIPE && this.currAnim == Animation.BLOWPIPE) {
+		if (!blowpipeAnimations.contains(this.prevAnim) && blowpipeAnimations.contains(this.currAnim)) {
 			this.tickDelay = 2;
-		} else if (this.prevAnim == Animation.BLOWPIPE && this.currAnim == Animation.BLOWPIPE) {
+		} else if (blowpipeAnimations.contains(this.prevAnim) && blowpipeAnimations.contains(this.currAnim)) {
 			if (player.getAnimationFrame() == 0)
 				this.tickDelay = 2;
 		}
@@ -158,6 +160,7 @@ public class TickLossHandler {
 			case THRALL:
 			case DEATH_CHARGE:
 			case BLOWPIPE:
+			case BLOWPIPE_BLAZING:
 				switch (weapon) {
 					case ItemID.CHINCHOMPA:
 					case ItemID.CHINCHOMPA_10033:
@@ -265,7 +268,8 @@ public class TickLossHandler {
 		SCYTHE(8056),
 		RAPIER(8145),
 		DEATH_CHARGE(8970),
-		THRALL(8973);
+		THRALL(8973),
+		BLOWPIPE_BLAZING(10656);
 
 		private final int id;
 
