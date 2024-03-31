@@ -118,6 +118,8 @@ public class ChatHandler {
 				} else if (this.plugin.isInFightCaves()) {
 					// Fight caves does not have a delay on the timer
 					eventBus.post(new TimerStartedEvent(0));
+				} else {
+					return;
 				}
 			} else if (config.tzhaarTimerState() == TimerHandler.TimerState.PAUSED) {
 				eventBus.post(new TimerStartedEvent(0));
@@ -127,6 +129,8 @@ public class ChatHandler {
 				wave.setLocation(Location.INFERNO);
 			} else if (this.plugin.isInFightCaves()) {
 				wave.setLocation(Location.FIGHT_CAVES);
+			} else {
+				return;
 			}
 
 			eventBus.post(new WaveStartedEvent(wave));
