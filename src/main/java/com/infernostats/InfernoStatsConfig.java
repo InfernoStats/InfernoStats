@@ -166,6 +166,28 @@ public interface InfernoStatsConfig extends Config {
 		return FileType.TEXT;
 	}
 
+	@ConfigItem(
+			position = 6,
+			keyName = "includeIdleTicksInSplits",
+			name = "Include Idle Ticks in Splits",
+			description = "Include idle ticks in splits quick-copy and saved files.",
+			section = waveAndSplitTimes
+	)
+	default boolean includeIdleTicksInSplits() {
+		return false;
+	}
+
+	@ConfigItem(
+			position = 7,
+			keyName = "includeDamageTakenInSplits",
+			name = "Include Damage Taken in Splits",
+			description = "Include damage taken in splits quick-copy and saved files.",
+			section = waveAndSplitTimes
+	)
+	default boolean includeDamageTakenInSplits() {
+		return false;
+	}
+
 	@ConfigSection(
 			name = "Target Split Times",
 			description = "Split times that you wish to achieve",
