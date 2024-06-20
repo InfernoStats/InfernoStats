@@ -166,6 +166,26 @@ public interface InfernoStatsConfig extends Config {
 		return FileType.TEXT;
 	}
 
+	@ConfigItem(
+			position = 6,
+			keyName = "showIdleTicksInSplitsFile",
+			name = "Show Idle Ticks in Splits File",
+			description = "Shows idle ticks in the splits file."
+	)
+	default boolean showIdleTicksInSplitsFile() {
+		return false;
+	}
+
+	@ConfigItem(
+			position = 7,
+			keyName = "showDamageTakenInSplitsFile",
+			name = "Show Damge Taken in Splits File",
+			description = "Shows damage taken in the splits file."
+	)
+	default boolean showDamageTakenInSplitsFile() {
+		return false;
+	}
+
 	@ConfigSection(
 			name = "Target Split Times",
 			description = "Split times that you wish to achieve",
