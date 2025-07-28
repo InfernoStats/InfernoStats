@@ -36,9 +36,9 @@ public class TimeFormatting {
     int minutes = (int) (totalSeconds / 60);
     int seconds = (int) (totalSeconds % 60);
 
-    int hundredths = (int) Math.round((totalSeconds - minutes * 60 - seconds) * 100);
+    int tenths = (int) Math.round((totalSeconds - minutes * 60 - seconds) * 10);
 
-    return String.format("%02d:%02d.%02d", minutes, seconds, hundredths);
+    return String.format("%02d:%02d.%d", minutes, seconds, tenths);
   }
 
   public static String formatTicksShort(long ticks) {
