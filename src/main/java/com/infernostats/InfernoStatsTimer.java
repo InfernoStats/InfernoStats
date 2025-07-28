@@ -7,30 +7,30 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class InfernoStatsTimer extends InfoBox {
-	private final InfernoStatsPlugin plugin;
+  private final InfernoStatsPlugin plugin;
 
-	public InfernoStatsTimer(BufferedImage image, InfernoStatsPlugin plugin) {
-		super(image, plugin);
+  public InfernoStatsTimer(BufferedImage image, InfernoStatsPlugin plugin) {
+    super(image, plugin);
 
-		this.plugin = plugin;
-	}
+    this.plugin = plugin;
+  }
 
-	@Override
-	public String getText() {
-		return getTime();
-	}
+  @Override
+  public String getText() {
+    return getTime();
+  }
 
-	@Override
-	public String getTooltip() {
-		return "Elapsed time: " + getTime();
-	}
+  @Override
+  public String getTooltip() {
+    return "Elapsed time: " + getTime();
+  }
 
-	@Override
-	public Color getTextColor() {
-		return Color.WHITE;
-	}
+  @Override
+  public Color getTextColor() {
+    return Color.WHITE;
+  }
 
-	private String getTime() {
-		return TimeFormatting.formatGameTicks(this.plugin.getRunDuration());
-	}
+  private String getTime() {
+    return TimeFormatting.formatTicksShort(plugin.getRunDuration());
+  }
 }

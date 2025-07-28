@@ -6,6 +6,9 @@ repositories {
     mavenLocal()
     maven {
         url = 'https://repo.runelite.net'
+        content {
+            includeGroupByRegex("net\\.runelite.*")
+        }
     }
     mavenCentral()
 }
@@ -25,9 +28,8 @@ dependencies {
 
 group = 'com.infernostats'
 version = '2.1.6'
-sourceCompatibility = '1.8'
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.release.set(11)
 }
