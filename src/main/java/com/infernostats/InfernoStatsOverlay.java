@@ -54,7 +54,7 @@ public class InfernoStatsOverlay extends OverlayPanel {
 
     if (prevSplitWave != null) {
       if (config.splitTimes()) {
-        contents.put("Wave " + prevSplitWave.getId() + " Split: ", TimeFormatting.getSplitTimeShort(prevSplitWave));
+        contents.put("Wave " + prevSplitWave.getId() + " Split: ", TimeFormatting.getSplitTime(prevSplitWave));
       }
 
       if ((prevSplitWave.getLocation() == Location.INFERNO) &&

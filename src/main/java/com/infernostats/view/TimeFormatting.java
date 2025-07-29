@@ -9,15 +9,11 @@ public class TimeFormatting {
   public static final double SECONDS_PER_TICK = (double) Constants.GAME_TICK_LENGTH / 1_000;
 
   public static String getSplitTime(Wave wave) {
-    return formatTicks(wave.getStart());
-  }
-
-  public static String getSplitTimeShort(Wave wave) {
     return formatTicksShort(wave.getStart());
   }
 
   public static String getCurrentWaveTime(Wave wave) {
-    return formatTicks(wave.getDuration());
+    return formatTicksShort(wave.getDuration());
   }
 
   public static String getCurrentTotalTime(Wave wave) {
@@ -26,7 +22,7 @@ public class TimeFormatting {
 
   public static String getSplitDelta(Wave wave, Wave prev) {
     return (prev == null)
-        ? formatTicks(wave.getStart())
+        ? formatTicksShort(wave.getStart())
         : formatDuration(wave.start().minus(prev.start()));
   }
 
