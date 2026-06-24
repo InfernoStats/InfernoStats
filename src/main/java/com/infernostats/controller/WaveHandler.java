@@ -113,27 +113,33 @@ public class WaveHandler {
 
   @Subscribe
   protected void onNpcSpawned(NpcSpawned e) {
+    if (!plugin.isInInferno() || wave == null) {
+      return;
+    }
+
     final NPC npc = e.getNpc();
-    final Actor npcActor = e.getActor();
-    final WorldPoint spawnTile = npcActor.getWorldLocation();
+    if (npc == null) {
+      return;
+    }
+
     final int npcId = npc.getId();
 
-    if (!this.plugin.isInInferno() || this.wave == null)
-      return;
-
     // ROCKY_SUPPORT is the normal pillar id; ROCKY_SUPPORT_7710 spawns as a pillar falls
-    if (npcId == NpcID.INFERNO_INVISIBLE_3X3 || npcId == NpcID.INFERNO_SAFESPOT_DYING)
+    if (npcId == NpcID.INFERNO_INVISIBLE_3X3 || npcId == NpcID.INFERNO_SAFESPOT_DYING) {
       return;
+    }
 
     // We'll ignore nibblers and jads, and zuk spawns off the map
-    if (npcId == NpcID.INFERNO_NIBBLER || npcId == NpcID.INFERNO_JAD || npcId == NpcID.INFERNO_TZKALZUK_PLACEHOLDER)
+    if (npcId == NpcID.INFERNO_NIBBLER || npcId == NpcID.INFERNO_JAD || npcId == NpcID.INFERNO_TZKALZUK_PLACEHOLDER) {
       return;
+    }
 
     // We only want the original wave spawn, not minions or mager respawns
-    if (wave.getDuration() > 2)
+    if (wave.getDuration() > 2) {
       return;
+    }
 
-    wave.addNPC(npc.getName(), spawnTile);
+    wave.addNpc(npc, npc.getWorldLocation());
   }
 
   @Subscribe

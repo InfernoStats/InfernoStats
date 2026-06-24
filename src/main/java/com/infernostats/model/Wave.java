@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.Constants;
+import net.runelite.api.NPC;
 import net.runelite.api.coords.WorldPoint;
 
 import java.time.Duration;
@@ -14,7 +15,7 @@ import java.util.Set;
 @Setter
 public class Wave {
   private final int id;
-  private ArrayList<NPC> npcs;
+  private ArrayList<WaveNpc> waveNpcs;
   private final long start;
   private long duration;
   private int damageTaken;
@@ -42,20 +43,22 @@ public class Wave {
     this.prayerDrain = 0;
     this.idleTicks = 0;
     this.state = WaveState.STARTED;
-    this.npcs = new ArrayList<>();
+    this.waveNpcs = new ArrayList<>();
     this.pace = null;
   }
 
-  public void addNPC(String name, WorldPoint spawnTile) {
-    this.npcs.add(new NPC(name, spawnTile));
+  public void addNpc(NPC npc, WorldPoint spawn) {
+    InfernoNpc.fromName(npc.getName()).ifPresent(type -> {
+      waveNpcs.add(new WaveNpc(type, spawn));
+    });
   }
 
   public boolean isSplit() {
     switch (location) {
       case FIGHT_CAVES:
         return FIGHT_CAVE_SPLIT_WAVES.contains(this.getId());
-      default:
       case INFERNO:
+      default:
         return SPLIT_WAVES.contains(this.getId());
     }
   }

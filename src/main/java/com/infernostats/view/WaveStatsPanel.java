@@ -1,9 +1,10 @@
 package com.infernostats.view;
 
-import com.google.common.collect.ImmutableMap;
 import com.infernostats.InfernoStatsConfig;
-import com.infernostats.model.NPC;
+import com.infernostats.model.InfernoNpc;
+import com.infernostats.model.WaveNpc;
 import com.infernostats.model.Wave;
+import com.infernostats.model.WaveSpawn;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -17,9 +18,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @Slf4j
 @Getter
@@ -195,34 +194,8 @@ public class WaveStatsPanel extends JPanel {
 	}
 
 	public void RedrawWaveSpawn() {
-		Map<String, ArrayList<ArrayList<Integer>>> mobs = remapNPCs();
-		ImmutableMap<String, Integer> mob_sizes = new ImmutableMap.Builder<String, Integer>()
-				.put("Jal-MejRah", 2)
-				.put("Jal-Ak", 3)
-				.put("Jal-ImKot", 4)
-				.put("Jal-Xil", 3)
-				.put("Jal-Zek", 4)
-				.build();
-
-		ImmutableMap<String, Color> mob_colors = new ImmutableMap.Builder<String, Color>()
-				.put("Jal-MejRah", Color.GRAY)
-				.put("Jal-Ak", Color.YELLOW)
-				.put("Jal-ImKot", Color.ORANGE)
-				.put("Jal-Xil", Color.GREEN)
-				.put("Jal-Zek", Color.RED)
-				.build();
-
-		for (Map.Entry<String, ArrayList<ArrayList<Integer>>> entry : mobs.entrySet()) {
-			final String name = entry.getKey();
-			final int size = mob_sizes.get(name);
-			final ArrayList<ArrayList<Integer>> spawnTiles = entry.getValue();
-
-			for (ArrayList<Integer> spawnTile : spawnTiles) {
-				final int x = spawnTile.get(0);
-				final int y = spawnTile.get(1);
-
-				imageLabel.drawSpawn(x, y, size, mob_colors.get(name));
-			}
+		for (WaveSpawn spawn : getWaveSpawns()) {
+			imageLabel.drawSpawn(spawn.getX(), spawn.getY(), spawn.getSize(), spawn.getColor());
 		}
 
 		imageLabel.revalidate();
@@ -230,51 +203,43 @@ public class WaveStatsPanel extends JPanel {
 	}
 
 	public String generateURL() {
-		Map<String, ArrayList<ArrayList<Integer>>> mobs = remapNPCs();
-
-		// Map in-game names to website parameter names
-		ImmutableMap<String, String> npc_names = new ImmutableMap.Builder<String, String>()
-				.put("Jal-MejRah", "bat")
-				.put("Jal-Ak", "blob")
-				.put("Jal-ImKot", "melee")
-				.put("Jal-Xil", "ranger")
-				.put("Jal-Zek", "mager")
-				.build();
-
 		StringBuilder sb = new StringBuilder();
-
 		sb.append(this.baseURL);
-		for (Map.Entry<String, ArrayList<ArrayList<Integer>>> entry : mobs.entrySet()) {
-			sb.append(npc_names.get(entry.getKey()));
-			sb.append("=");
-			sb.append(entry.getValue());
-			sb.append("&");
-		}
-		sb.append("copyable");
 
+		for (InfernoNpc type : InfernoNpc.values()) {
+			List<WaveSpawn> spawns = getWaveSpawns().stream()
+				.filter(s -> s.getColor().equals(type.color))
+				.collect(java.util.stream.Collectors.toList());
+
+			if (spawns.isEmpty())
+				continue;
+
+			List<List<Integer>> tiles = spawns.stream()
+				.map(s -> java.util.Arrays.asList(s.getX(), s.getY()))
+				.collect(java.util.stream.Collectors.toList());
+
+			sb.append(type.urlParam).append("=").append(tiles).append("&");
+		}
+
+		sb.append("copyable");
 		return sb.toString().replaceAll("\\s", "");
 	}
 
-	private Map<String, ArrayList<ArrayList<Integer>>> remapNPCs() {
-		Map<String, ArrayList<ArrayList<Integer>>> mobs = new HashMap<>();
+	private List<WaveSpawn> getWaveSpawns() {
+		// The SW-most corner region tile is 17,17 -> website tile 0,29
+		// The NW-most corner region tile is 17,46 -> website tile 0,0
+		final int xOffset = 17;
+		final int yOffset = 46;
 
-		for (NPC npc : this.wave.getNpcs()) {
-			// The SW-most corner region tile is 17,17
-			// The SW-most corner website tile is 0, 29
-			final int xOffset = 17;
-
-			// The NW-most corner region tile is 17,46
-			// The NW-most corner website tile is 0, 0
-			final int yOffset = 46;
-
-			final int x = npc.getTile().getRegionX() - xOffset;
-			final int y = yOffset - npc.getTile().getRegionY();
-
-			mobs.computeIfAbsent(npc.getName(), k -> new ArrayList<>());
-			mobs.get(npc.getName()).add(new ArrayList<>(Arrays.asList(x, y)));
+		List<WaveSpawn> spawns = new ArrayList<>();
+		for (WaveNpc npc : wave.getWaveNpcs()) {
+			final InfernoNpc type = npc.getType();
+			final int x = npc.getSpawn().getX() - xOffset;
+			final int y = yOffset - npc.getSpawn().getY();
+			spawns.add(new WaveSpawn(x, y, type.size, type.color));
 		}
 
-		return mobs;
+		return spawns;
 	}
 
 	public void update() {
